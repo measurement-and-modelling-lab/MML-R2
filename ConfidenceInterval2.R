@@ -1,5 +1,6 @@
 function (n, k, Rsq, conlev) {
-
+  #Implementation based off the paper "Towards using confidence intervals to compare correlations" (ZOU 2007)
+  
 	n <- as.numeric(n)
 	k <- as.numeric(k)
 	Rsq <- as.numeric(Rsq)
@@ -8,13 +9,13 @@ function (n, k, Rsq, conlev) {
 	Bisection <- function (n, k, Rsq, conlev) {
 
 		maxiter <- 50 # maximum number of iterations
-		pul <- (1-conlev)/2 # .025
-		pll <- 1-(1-conlev)/2 # .975
+		pul <- (1-conlev)/2 
+		pll <- 1-(1-conlev)/2 
 		df1 <- n-1 
 		df2 <- n-k-1
 		Rsqtilde <- Rsq/(1-Rsq)
 
-		check <- pf(df2*Rsqtilde/k,k,df2)  #probf(df2*Rsqtilde/k,k,df2); 
+		check <- pf(df2*Rsqtilde/k,k,df2)  
 
 		if (check <= pul){  
 		  lower =NULL
@@ -60,7 +61,7 @@ function (n, k, Rsq, conlev) {
 				  nu <- (phi2-2*yy*gamma*(sqrt(df1*df2)))/g**2
 				  lambdau <- yy*gamma*(sqrt(df1*df2))/g**2
 				  limit<- df2*Rsqtilde/(nu*g)
-				  diff <- pf(limit,nu,df2,lambdau)-criterion #probf(limit,nu,df2,lambdau)-criterion
+				  diff <- pf(limit,nu,df2,lambdau)-criterion 
 				  if (root == 1){
 					diff3 <- diff
 				  }
@@ -73,17 +74,17 @@ function (n, k, Rsq, conlev) {
 				}
 			  }
 			  
-			  #*root;
+			 
 
 			  if (diff1*diff3<0){
 				x2 <- x3
 			  }
 			  else {
 				x1 <- x3
-				upper <- x3   #*upper = x3
+				upper <- x3   
 			  }
 
-			  #*while
+		
 			}
 			  
 
@@ -99,11 +100,6 @@ function (n, k, Rsq, conlev) {
 			lower <- 0
 		  }
 		}
-		# df1F <- k-1
-		# df2F <- n-df1F-1
-		# Fobs <- (Rsq/df1F)/((1-Rsq)/(df2F))
-		# plevel <- 1-pf(Fobs,df1F,df2F,ncp = 0)
-		# print(plevel)
 
 		return(c(lower, upper))
 	}
@@ -128,7 +124,10 @@ function (n, k, Rsq, conlev) {
 	} else if (nchar(lbound) < 7) {
 		lbound <- paste0(lbound,0)
 	}
-
+	
+	
+        #Create a formatted output
+	
         output_table <- matrix(c('Lower Limit', 'Upper Limit', 'Lower Bound', format(lower, scientific=F), format(upper, scientific=F), format(lbound, scientific=F)), nrow=3, ncol=2)
 
 

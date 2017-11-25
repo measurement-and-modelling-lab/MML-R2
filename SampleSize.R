@@ -8,9 +8,9 @@ function (k, rho, alpha, power) {
     
     N = 1000
     i = 1
-    increment = 1000
+    increment = 1000 #Special value used for bijection range finding
     count = 0
-    tol = 0.00000001
+    tol = 0.00000001 #Tolerance
     found = FALSE
 
     while(!found){
@@ -34,15 +34,15 @@ function (k, rho, alpha, power) {
         }
 
         fcrit <- qf(1-alpha,df1,df2)
-        powerest <- 1-pf(fcrit,df1,df1,ncp=nc)
-
+        powerest <- 1-pf(fcrit,df1,df1,ncp=nc) #Power Estimate
+        #Moified bijection
         if (powerest > power) {
-            increment <- increment/2
+            increment <- increment/2  
             N <- N-increment
         }
 
         else if (powerest < power) {
-            N <- N+increment
+            N <- N+increment #Increment the N estimate by increment until it goes above the Original estimate
         }
 
         if (abs(powerest-power) < tol) {
@@ -64,7 +64,7 @@ function (k, rho, alpha, power) {
 		Fobs <- (rho/df1)/((1-rho)/(N-df1-1))
 
 		nc = N*(rho/(1-rho))
-		fcrit <- qf(1-alpha,df1,df2)
+		fcrit <- qf(1-alpha,df1,df2) #Find Critical F value
 
 		power <- round(1-pf(fcrit,df1,df1,ncp=nc), 5)
 		if (power == 1) {
@@ -73,8 +73,8 @@ function (k, rho, alpha, power) {
 		return(power)
 	}
 	
-    powerlow <- round(Power(df1,Nlow,rho,alpha), 5)
-    powerhigh <- round(Power(df1,Nhigh,rho,alpha), 5)
+    powerlow <- round(Power(df1,Nlow,rho,alpha), 5) # Calculates power using the lower N
+    powerhigh <- round(Power(df1,Nhigh,rho,alpha), 5) # Calculates power using the higher N
 
     if (powerlow == 1) {
         powerlow <- '> 0.99999'
@@ -84,8 +84,9 @@ function (k, rho, alpha, power) {
         powerhigh <- '> 0.99999'
     }
 
-    #output_table <- matrix(c('N', Nlow, Nhigh, 'Power', powerlow, powerhigh), nrow=3, ncol=2)
-
+    
+  #Create formatted output
+    
 	output_table <- matrix(c(paste0('Power (N = ', Nlow, ')'), paste0('Power (N = ', Nhigh, ')'), powerlow, powerhigh), nrow=2, ncol=2)
 	
     cat('<center><b>Sample Size Calculation Results</b>')

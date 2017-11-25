@@ -2,6 +2,7 @@ function(calculation,v1,v2,v3,v4){
     if (calculation %in% c("ci1","ci2")) {
 
 
+    #Check that all characters are numeric
 		string <- strsplit(v4, "")[[1]]
 		for (char in string) {
 			if (!(char=='.' || char%in%c(0:9))) {
@@ -32,18 +33,18 @@ function(calculation,v1,v2,v3,v4){
         if (grepl("\\D", v2)) {
             return(NULL)
         }
-
+        # Check that v3 is a valid input
         v3 <- as.numeric(v3)
         if (v3 < 0 || v3 > 1) {
             return(NULL)
         }
-
+    # Check that v4 is a valid input
 		v4 <- as.numeric(v4)
 		if (v4 < 0 || v4 > 1) {
 			return(NULL)
 		}
     }
-    
+    #Check if the inputs are numeric and valid
     if (calculation == "pa") {
         for (b in list(v1,v2,v3,v4)) {
             result <- tryCatch({
@@ -117,6 +118,6 @@ function(calculation,v1,v2,v3,v4){
             return(NULL)
         }
     }
-
+    #Reture true if no errors, otherwise NULL
     return(TRUE)
 }

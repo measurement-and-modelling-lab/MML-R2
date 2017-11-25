@@ -1,4 +1,7 @@
 function (table, header) {
+  
+  #Create HTML Table
+  
 	cat('<table border="1" width=200px>')
     for (i in 1:nrow(table)) {
         if (i == 1 & header == TRUE) {

@@ -21,7 +21,7 @@ function(N, k, rho, alpha){
 	}
 
 
-
+        #Create formatted output
         output_table <- matrix(c('Power', power), nrow=1, ncol=2)
 
         cat('<center><b>Power Calculation Results</b>')
