@@ -1,5 +1,6 @@
 shinyServer(function(input, output, session) {
 
+	# Global values
     values <- reactiveValues()
     values$n <- ""
     values$k <- ""
@@ -14,6 +15,7 @@ shinyServer(function(input, output, session) {
 
     output$valueInput <- renderUI({
 
+	  # Create input widgets for global calculation value, with default values from global
       html_ui <- ""
       if (values$calculation == "ci1") {
         html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
@@ -49,6 +51,7 @@ shinyServer(function(input, output, session) {
       HTML(html_ui)
     })
 
+	# If calculation is changed, send current widget values to global, then update global calculation value to change the input widgets
     observeEvent(input$calculation, {
       values$n <- input$n
       values$k <- input$k
@@ -143,17 +146,16 @@ shinyServer(function(input, output, session) {
       }
       if (temp1 != values$output[[length(values$output)]]) {
         values$output[[length(values$output)+1]] <- temp1
-        if (length(values$output) > 9) {
-          first <- length(values$output)-9
+        if (length(values$output) > 19) {
+          first <- length(values$output)-19
         } else {
           first <- 1
         }
         last <- length(values$output)
         capture.output(cat(paste(unlist(rev(values$output[first:last])), collapse='<br>')))
-      } else {
-        
-        if (length(values$output) > 9) {
-          first <- length(values$output)-9
+      } else {        
+        if (length(values$output) > 19) {
+          first <- length(values$output)-19
         } else {
           first <- 1
         }
