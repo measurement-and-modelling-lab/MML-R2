@@ -16,7 +16,7 @@ shinyUI(fluidPage(theme = "simplex.css",
                   
                   
                   
-  headerPanel('MML R-Squared', windowTitle = 'MML - R-Squared'),
+  headerPanel('MML-R2', windowTitle = 'MML - R-Squared'),
 
   HTML("<br><br>"),
  
