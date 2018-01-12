@@ -26,7 +26,8 @@ shinyUI(fluidPage(theme = "simplex.css",
                  c("Confidence Interval (Fixed Regressor)" = "ci1",
                    "Confidence Interval (Random Regressor)" = "ci2",
                    "Power Analysis" = "pa",
-                   "Necessary Sample Size" = "ssc"
+                   "Necessary Sample Size" = "ssc",
+                   "Rxx Matrix" = "rxx"
                    #"Percentage Point" = "ppc",
                    #"Probability Integral" = "pic"
                  )

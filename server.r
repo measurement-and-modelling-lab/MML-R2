@@ -47,6 +47,8 @@ shinyServer(function(input, output, session) {
         html_ui <- paste0(html_ui, textInput("k", "Number of variables, including criterion:", values$k))
         html_ui <- paste0(html_ui, textInput("r", "R squared:", values$r))
         html_ui <- paste0(html_ui, textInput("rho", "Rho squared:", values$rho))
+      } else if (values$calculation == "rxx") {
+        html_ui <- paste0(html_ui, fileInput("datafile", "Correlation file:"))
       }
       HTML(html_ui)
     })
@@ -136,13 +138,18 @@ shinyServer(function(input, output, session) {
         validate(need(input$percentage, ""))
         #PercentagePoint <- dget("PercentagePoint.R")
         #capture.output(PercentagePoint(input$n, input$k, input$rho, input$percentage))
-      } else {
+      } else if (input$calculation == "pic") {
         validate(need(input$n, ""))
         validate(need(input$k, ""))
         validate(need(input$r, ""))
         validate(need(input$rho, ""))
         #ProbabilityIntegral <- dget("ProbabilityIntegral.R")
         #capture.output(ProbabilityIntegral(input$n, input$k, input$r, input$rho))
+      } else {
+        validate(need(input$datafile, ""))
+        rxx <- dget("rxx.R")
+        data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+        temp1 <- capture.output(rxx(data))
       }
       if (temp1 != values$output[[length(values$output)]]) {
         values$output[[length(values$output)+1]] <- temp1
