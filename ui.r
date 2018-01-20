@@ -11,6 +11,15 @@ shinyUI(fluidPage(theme = "simplex.css",
                     line-height: 1.1;
                     color: #333;
                     }
+                    td {
+                      white-space: nowrap;
+                      width: 1px;
+                      padding-left: 8px;
+                      padding-right: 8px;
+                      padding-top: 0px;
+                      padding-bottom: 0px;
+                      color: #717171;
+                    }
                     "))
     ),
                   
@@ -22,7 +31,7 @@ shinyUI(fluidPage(theme = "simplex.css",
  
   sidebarLayout(
   sidebarPanel(
-    radioButtons("calculation", "Calculation to run:",
+    selectInput("calculation", "Calculation to run:",
                  c("Confidence Interval (Fixed Regressor)" = "ci1",
                    "Confidence Interval (Random Regressor)" = "ci2",
                    "Power Analysis" = "pa",
@@ -32,12 +41,14 @@ shinyUI(fluidPage(theme = "simplex.css",
                    #"Probability Integral" = "pic"
                  )
     ),
+    conditionalPanel(condition = "input.calculation == 'rxx'", fileInput("datafile", "Correlation file:"), textInput("variables", "Number of Variables:","3")),
     uiOutput("valueInput"),
-    actionButton("runButton", "Run")
+    conditionalPanel(condition = "input.calculation != 'rxx'", actionButton("runButton", "Run"))
   ),
-
+  
   mainPanel(
-    htmlOutput("r2Output")
+    conditionalPanel(condition = "input.calculation != 'rxx'", htmlOutput("r2Output")),
+    conditionalPanel(condition = "input.calculation == 'rxx'", htmlOutput("rxxoutput"))
   )),
   HTML('<br>'),
   HTML('

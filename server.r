@@ -48,11 +48,59 @@ shinyServer(function(input, output, session) {
         html_ui <- paste0(html_ui, textInput("r", "R squared:", values$r))
         html_ui <- paste0(html_ui, textInput("rho", "Rho squared:", values$rho))
       } else if (values$calculation == "rxx") {
-        html_ui <- paste0(html_ui, fileInput("datafile", "Correlation file:"))
+        variables <- as.integer(input$variables)
+        
+        string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
+        html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
+        html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion", string_vector[1:variables])))
       }
       HTML(html_ui)
     })
+    
+    output$rxxoutput <- reactive({
 
+      # Import data file
+      validate(need(input$datafile, ""))
+      validate(need(input$predictors, ""))
+      data <- input$datafile
+      
+      # Check that R can read the data file as a .csv
+      result = tryCatch({
+        read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+      }, warning = function(w) {
+        'problem'
+      }, error = function(e) {
+        'problem'
+      }, finally = {
+      })
+      if ('problem' %in% result) {
+        return(capture.output(cat('<br>Error: There was an problem reading data file #1; it may not be a .csv file.', sep="")))
+      } else { # If so import it as a matrix
+        data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+      }
+      
+      if (ncol(data) > 16) {
+        return()
+      }
+      
+      if (ncol(data) > input$variables) {
+        return()
+      }
+      
+      if (as.character(input$criterion) %in% input$predictors) {
+        return()
+      }
+      
+      if (length(input$predictors) < 2) {
+        return()
+      }
+      
+      rxx <- dget("rxx.R")
+      capture.output(rxx(data, input$predictors, input$criterion))
+      
+    })
+    
+    
 	# If calculation is changed, send current widget values to global, then update global calculation value to change the input widgets
     observeEvent(input$calculation, {
       values$n <- input$n
