@@ -38,8 +38,7 @@ shinyUI(fluidPage(theme = "simplex.css",
                  )
     ),
     HTML("<hr>"),
-    conditionalPanel(condition = "input.calculation == 'rxx'", fileInput("datafile", "Correlation file:"),
-                     sliderInput("variables", "Number of Variables:", min = 3, max = 8, value = 3)),
+    conditionalPanel(condition = "input.calculation == 'rxx'", fileInput("datafile", "Correlation file:")),
     uiOutput("valueInput"),
     conditionalPanel(condition = "input.calculation != 'rxx'", HTML("<hr>")),
     conditionalPanel(condition = "input.calculation != 'rxx'", actionButton("runButton", "Run"))

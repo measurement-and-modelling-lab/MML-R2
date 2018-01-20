@@ -48,8 +48,32 @@ shinyServer(function(input, output, session) {
         html_ui <- paste0(html_ui, textInput("r", "R squared:", values$r))
         html_ui <- paste0(html_ui, textInput("rho", "Rho squared:", values$rho))
       } else if (values$calculation == "rxx") {
-        variables <- as.integer(input$variables)
         
+        # Import data file
+        validate(need(input$datafile, ""))
+        data <- input$datafile
+        
+        # Check that R can read the data file as a .csv
+        result = tryCatch({
+            read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+        }, warning = function(w) {
+            'problem'
+        }, error = function(e) {
+            'problem'
+        }, finally = {
+        })
+        if ('problem' %in% result) {
+            return()
+        } else { # If so import it as a matrix
+            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+        }
+        
+        if (ncol(data) != nrow(data)) {
+            return()
+        }
+        
+        variables <- ncol(data)
+
         string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
         html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
         html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables])))
@@ -79,11 +103,11 @@ shinyServer(function(input, output, session) {
         data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
       }
       
-      if (ncol(data) > 16) {
-        return()
+      if (ncol(data) != nrow(data)) {
+          return()
       }
       
-      if (ncol(data) > input$variables) {
+      if (ncol(data) > 16) {
         return()
       }
       
