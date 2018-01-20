@@ -18,35 +18,35 @@ shinyServer(function(input, output, session) {
 	  # Create input widgets for global calculation value, with default values from global
       html_ui <- ""
       if (values$calculation == "ci1") {
-        html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
-        html_ui <- paste0(html_ui, textInput("k", "Number of variables, including criterion:", values$k))
-        html_ui <- paste0(html_ui, textInput("r", "R squared:", values$r))
-        html_ui <- paste0(html_ui, textInput("confidence", "Confidence level:", values$confidence))
+        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          textInput("k", "Number of variables, including criterion:", values$k),
+                          textInput("r", "R squared:", values$r),
+                          textInput("confidence", "Confidence level:", values$confidence))
       } else if (values$calculation == "ci2") {
-        html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
-        html_ui <- paste0(html_ui, textInput("k", "Number of variables, including criterion:", values$k))
-        html_ui <- paste0(html_ui, textInput("r", "R squared:", values$r))
-        html_ui <- paste0(html_ui, textInput("confidence", "Confidence level:", values$confidence))
+        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          textInput("k", "Number of variables, including criterion:", values$k),
+                          textInput("r", "R squared:", values$r),
+                          textInput("confidence", "Confidence level:", values$confidence))
       } else if (values$calculation == "pa") {
-        html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
-        html_ui <- paste0(html_ui, textInput("k", "Number of variables, including criterion:", values$k))
-        html_ui <- paste0(html_ui, textInput("rho", "Rho squared:", values$rho))
-        html_ui <- paste0(html_ui, textInput("alpha", "Alpha:", values$alpha))
+        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          textInput("k", "Number of variables, including criterion:", values$k),
+                          textInput("rho", "Rho squared:", values$rho),
+                          textInput("alpha", "Alpha:", values$alpha))
       } else if (values$calculation == "ssc") {
-        html_ui <- paste0(html_ui, textInput("k", "Number of variables, including criterion:", values$k))
-        html_ui <- paste0(html_ui, textInput("rho", "Rho squared:", values$rho))
-        html_ui <- paste0(html_ui, textInput("alpha", "Alpha:", values$alpha))
-        html_ui <- paste0(html_ui, textInput("power", "Power desired:", values$power))
+        html_ui <- paste0(textInput("k", "Number of variables, including criterion:", values$k),
+                          textInput("rho", "Rho squared:", values$rho),
+                          textInput("alpha", "Alpha:", values$alpha),
+                          textInput("power", "Power desired:", values$power))
       } else if (values$calculation == "ppc") {
-        html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
-        html_ui <- paste0(html_ui, textInput("k", "Number of variables, including criterion:", values$k))
-        html_ui <- paste0(html_ui, textInput("rho", "Rho squared:", values$rho))
-        html_ui <- paste0(html_ui, textInput("percentage", "Percentage point desired:", values$percentage))
+        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          textInput("k", "Number of variables, including criterion:", values$k),
+                          textInput("rho", "Rho squared:", values$rho),
+                          textInput("percentage", "Percentage point desired:", values$percentage))
       } else if (values$calculation == "pic") {
-        html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
-        html_ui <- paste0(html_ui, textInput("k", "Number of variables, including criterion:", values$k))
-        html_ui <- paste0(html_ui, textInput("r", "R squared:", values$r))
-        html_ui <- paste0(html_ui, textInput("rho", "Rho squared:", values$rho))
+        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          textInput("k", "Number of variables, including criterion:", values$k),
+                          textInput("r", "R squared:", values$r),
+                          textInput("rho", "Rho squared:", values$rho))
       } else if (values$calculation == "rxx") {
         
         # Import data file
@@ -136,10 +136,6 @@ shinyServer(function(input, output, session) {
       values$power <- input$power
       values$percentage <- input$percentage
       values$calculation <- input$calculation
-    })
-    
-    observeEvent(input$runButton, {
-      updateTabsetPanel(session, "inTabset", 'out')
     })
 
     output$r2Output <- eventReactive(input$runButton, {
