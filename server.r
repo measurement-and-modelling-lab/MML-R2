@@ -52,7 +52,7 @@ shinyServer(function(input, output, session) {
         
         string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
         html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
-        html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion", string_vector[1:variables])))
+        html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables])))
       }
       HTML(html_ui)
     })

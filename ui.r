@@ -27,22 +27,21 @@ shinyUI(fluidPage(theme = "simplex.css",
                   
   headerPanel('MML-R2', windowTitle = 'MML - R-Squared'),
 
-  HTML("<br><br>"),
- 
   sidebarLayout(
   sidebarPanel(
     selectInput("calculation", "Calculation to run:",
-                 c("Confidence Interval (Fixed Regressor)" = "ci1",
-                   "Confidence Interval (Random Regressor)" = "ci2",
+                 c("Fixed Regressor CI" = "ci1",
+                   "Random Regressor CI" = "ci2",
                    "Power Analysis" = "pa",
                    "Necessary Sample Size" = "ssc",
-                   "Rxx Matrix" = "rxx"
-                   #"Percentage Point" = "ppc",
-                   #"Probability Integral" = "pic"
+                   "Squared Multiple Correlation" = "rxx"
                  )
     ),
-    conditionalPanel(condition = "input.calculation == 'rxx'", fileInput("datafile", "Correlation file:"), textInput("variables", "Number of Variables:","3")),
+    HTML("<hr>"),
+    conditionalPanel(condition = "input.calculation == 'rxx'", fileInput("datafile", "Correlation file:"),
+                     sliderInput("variables", "Number of Variables:", min = 3, max = 8, value = 3)),
     uiOutput("valueInput"),
+    conditionalPanel(condition = "input.calculation != 'rxx'", HTML("<hr>")),
     conditionalPanel(condition = "input.calculation != 'rxx'", actionButton("runButton", "Run"))
   ),
   
