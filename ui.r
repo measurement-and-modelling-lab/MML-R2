@@ -30,8 +30,8 @@ shinyUI(fluidPage(theme = "simplex.css",
   sidebarLayout(
   sidebarPanel(
     selectInput("calculation", "Calculation to run:",
-                 c("Fixed Regressor CI" = "ci1",
-                   "Random Regressor CI" = "ci2",
+                 c("Fixed Regressor Confidence Interval" = "ci1",
+                   "Random Regressor Confidence Interval" = "ci2",
                    "Power Analysis" = "pa",
                    "Necessary Sample Size" = "ssc",
                    "Squared Multiple Correlation" = "rxx"
