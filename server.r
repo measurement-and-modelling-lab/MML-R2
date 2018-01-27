@@ -68,9 +68,6 @@ shinyServer(function(input, output, session) {
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
         }
         
-        if (ncol(data) != nrow(data)) {
-            return()
-        }
         
         variables <- ncol(data)
 
@@ -101,10 +98,6 @@ shinyServer(function(input, output, session) {
         return(capture.output(cat('<br>Error: There was an problem reading data file #1; it may not be a .csv file.', sep="")))
       } else { # If so import it as a matrix
         data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-      }
-      
-      if (ncol(data) != nrow(data)) {
-          return()
       }
       
       if (ncol(data) > 16) {
