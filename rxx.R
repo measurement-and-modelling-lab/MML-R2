@@ -25,6 +25,7 @@ function (data, X, Y) {
 	b <- solve(Rxx) %*% Rxy
 	b <- round(b, 3)
 	R2 <- t(b) %*% Rxy
+	R2 <- round(R2, 3)
 	
 	
 	
