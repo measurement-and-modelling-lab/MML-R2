@@ -14,7 +14,7 @@ function (data, X, Y) {
 	R2 <- round(R2, 3)
 	R2 <- cbind('R<sup>2</sup>', R2)
 
-	cat('<center><div style="line-height: 175%;"><b>Squared Multiple Correlation</b></div>')
+	cat('<center><div style="line-height: 175%;"><b>Squared Multiple Correlation:</b></div>')
 	tablegen(R2, FALSE)
     cat('<i>Y = ', Y, ', X = ', paste(X, collapse=','), '</i></center>', sep="")
 }

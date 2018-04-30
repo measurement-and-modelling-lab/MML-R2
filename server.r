@@ -11,6 +11,8 @@ shinyServer(function(input, output, session) {
     values$power <- ""
     values$percentage <- ""
     values$calculation <- ""
+	values$predictors <- ""
+	values$criterion <- ""
     values$output <-list('')
 
     output$valueInput <- renderUI({
@@ -70,8 +72,8 @@ shinyServer(function(input, output, session) {
 			variables <- ncol(data)
 
 			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
-			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
-			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables])))
+			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)))
+			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
 
       } else if (values$calculation == "r2") {
         
@@ -96,8 +98,8 @@ shinyServer(function(input, output, session) {
 			variables <- ncol(data)
 
 			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
-			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
-			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables])))
+			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)))
+			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
 
       }
       HTML(html_ui)
@@ -114,6 +116,8 @@ shinyServer(function(input, output, session) {
       values$power <- input$power
       values$percentage <- input$percentage
       values$calculation <- input$calculation
+      values$predictors <- input$predictors
+      values$criterion <- input$criterion
     })
 
     output$r2Output <- eventReactive(input$runButton, {
