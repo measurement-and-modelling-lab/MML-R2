@@ -49,74 +49,33 @@ shinyServer(function(input, output, session) {
                           textInput("rho", "Rho squared:", values$rho))
       } else if (values$calculation == "rxx") {
         
-        # Import data file
-        validate(need(input$datafile, ""))
-        data <- input$datafile
-        
-        # Check that R can read the data file as a .csv
-        result = tryCatch({
-            read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
-        }, warning = function(w) {
-            'problem'
-        }, error = function(e) {
-            'problem'
-        }, finally = {
-        })
-        if ('problem' %in% result) {
-            return()
-        } else { # If so import it as a matrix
-            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-        }
-        
-        
-        variables <- ncol(data)
+			# Import data file
+			validate(need(input$datafile, ""))
 
-        string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
-        html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
-        html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables])))
+			# Check that R can read the data file as a .csv
+			result = tryCatch({
+				read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+			}, warning = function(w) {
+				'problem'
+			}, error = function(e) {
+				'problem'
+			}, finally = {
+			})
+			if ('problem' %in% result) {
+				return()
+			} else { # If so import it as a matrix
+				data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+			}
+
+			variables <- ncol(data)
+
+			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
+			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
+			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables])))
+
       }
       HTML(html_ui)
     })
-    
-    output$rxxoutput <- reactive({
-
-      # Import data file
-      validate(need(input$datafile, ""))
-      validate(need(input$predictors, ""))
-      data <- input$datafile
-      
-      # Check that R can read the data file as a .csv
-      result = tryCatch({
-        read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
-      }, warning = function(w) {
-        'problem'
-      }, error = function(e) {
-        'problem'
-      }, finally = {
-      })
-      if ('problem' %in% result) {
-        return(capture.output(cat('<br>Error: There was an problem reading data file #1; it may not be a .csv file.', sep="")))
-      } else { # If so import it as a matrix
-        data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-      }
-      
-      if (ncol(data) > 16) {
-        return()
-      }
-      
-      if (as.character(input$criterion) %in% input$predictors) {
-        return()
-      }
-      
-      if (length(input$predictors) < 2) {
-        return()
-      }
-      
-      rxx <- dget("rxx.R")
-      capture.output(rxx(data, input$predictors, input$criterion))
-      
-    })
-    
     
 	# If calculation is changed, send current widget values to global, then update global calculation value to change the input widgets
     observeEvent(input$calculation, {
@@ -192,26 +151,62 @@ shinyServer(function(input, output, session) {
               SampleSize <- dget("SampleSize.R")
               temp1 <- capture.output(SampleSize(input$k, input$rho, input$alpha, input$power))
           }
-      } else if (input$calculation == "ppc") {
-        validate(need(input$n, ""))
-        validate(need(input$k, ""))
-        validate(need(input$rho, ""))
-        validate(need(input$percentage, ""))
-        #PercentagePoint <- dget("PercentagePoint.R")
-        #capture.output(PercentagePoint(input$n, input$k, input$rho, input$percentage))
-      } else if (input$calculation == "pic") {
-        validate(need(input$n, ""))
-        validate(need(input$k, ""))
-        validate(need(input$r, ""))
-        validate(need(input$rho, ""))
-        #ProbabilityIntegral <- dget("ProbabilityIntegral.R")
-        #capture.output(ProbabilityIntegral(input$n, input$k, input$r, input$rho))
       } else {
-        validate(need(input$datafile, ""))
-        rxx <- dget("rxx.R")
-        data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-        temp1 <- capture.output(rxx(data))
+		  validate(need(input$datafile, ""))
+		  validate(need(input$predictors, ""))
+		  validate(need(input$criterion, ""))
+
+		  # Check that R can read the data file as a .csv
+		  result = tryCatch({
+			read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+		  }, warning = function(w) {
+			'problem'
+		  }, error = function(e) {
+			'problem'
+		  }, finally = {
+		  })
+		  if ('problem' %in% result) {
+			return(capture.output(cat('<br>Error: There was an problem reading data file #1; it may not be a .csv file.', sep="")))
+		  } else { # If so import it as a matrix
+			data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+		  }
+		  
+		  if (ncol(data) > 16) {
+			return()
+		  }
+		  
+		  if (as.character(input$criterion) %in% input$predictors) {
+			return()
+		  }
+		  
+		  if (length(input$predictors) < 2) {
+			return()
+		  }
+		  
+		  rxx <- dget("stdb.R")
+		  tablegen <- dget("tablegen.r")
+		  
+		  predictors <- as.numeric(input$predictors)
+		  criterion <- as.numeric(input$criterion)
+		  
+		  X <- data[,predictors]
+		  Y <- data[,criterion]
+
+		  cov.x <- cov(X)
+		  cov.xy <- cov(X, Y)
+		  var.y <- var(Y)
+		  Nobs <- as.numeric(input$Nobs)
+		  
+		  corrmatrix <- cor(data)
+
+		  temp1 <- capture.output(rxx(X=X, y=Y, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, Nobs=Nobs))
+
+
+
+
+
       }
+
       if (temp1 != values$output[[length(values$output)]]) {
         values$output[[length(values$output)+1]] <- temp1
         if (length(values$output) > 19) {

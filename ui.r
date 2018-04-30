@@ -39,14 +39,14 @@ shinyUI(fluidPage(theme = "simplex.css",
     ),
     HTML("<hr>"),
     conditionalPanel(condition = "input.calculation == 'rxx'", fileInput("datafile", "Correlation file:")),
+    conditionalPanel(condition = "input.calculation == 'rxx'", textInput("Nobs", "Sample size:")),
     uiOutput("valueInput"),
     conditionalPanel(condition = "input.calculation != 'rxx'", HTML("<hr>")),
-    conditionalPanel(condition = "input.calculation != 'rxx'", actionButton("runButton", "Run"))
+	actionButton("runButton", "Run")
   ),
   
   mainPanel(
-    conditionalPanel(condition = "input.calculation != 'rxx'", htmlOutput("r2Output")),
-    conditionalPanel(condition = "input.calculation == 'rxx'", htmlOutput("rxxoutput"))
+	htmlOutput("r2Output")
   )),
   HTML('<br>'),
   HTML('
