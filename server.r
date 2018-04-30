@@ -47,7 +47,33 @@ shinyServer(function(input, output, session) {
                           textInput("k", "Number of variables, including criterion:", values$k),
                           textInput("r", "R squared:", values$r),
                           textInput("rho", "Rho squared:", values$rho))
-      } else if (values$calculation == "rxx") {
+      } else if (values$calculation == "b") {
+        
+			# Import data file
+			validate(need(input$datafile, ""))
+
+			# Check that R can read the data file as a .csv
+			result = tryCatch({
+				read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+			}, warning = function(w) {
+				'problem'
+			}, error = function(e) {
+				'problem'
+			}, finally = {
+			})
+			if ('problem' %in% result) {
+				return()
+			} else { # If so import it as a matrix
+				data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+			}
+
+			variables <- ncol(data)
+
+			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
+			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables])))
+			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables])))
+
+      } else if (values$calculation == "r2") {
         
 			# Import data file
 			validate(need(input$datafile, ""))
@@ -151,7 +177,7 @@ shinyServer(function(input, output, session) {
               SampleSize <- dget("SampleSize.R")
               temp1 <- capture.output(SampleSize(input$k, input$rho, input$alpha, input$power))
           }
-      } else {
+      } else if (input$calculation == "b") {
 		  validate(need(input$datafile, ""))
 		  validate(need(input$predictors, ""))
 		  validate(need(input$criterion, ""))
@@ -202,10 +228,51 @@ shinyServer(function(input, output, session) {
 		  temp1 <- capture.output(rxx(X=X, y=Y, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, Nobs=Nobs))
 
 
+      } else if (input$calculation == "r2") {
+		  validate(need(input$datafile, ""))
+		  validate(need(input$predictors, ""))
+		  validate(need(input$criterion, ""))
 
+		  # Check that R can read the data file as a .csv
+		  result = tryCatch({
+			read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+		  }, warning = function(w) {
+			'problem'
+		  }, error = function(e) {
+			'problem'
+		  }, finally = {
+		  })
+		  if ('problem' %in% result) {
+			return(capture.output(cat('<br>Error: There was an problem reading data file #1; it may not be a .csv file.', sep="")))
+		  } else { # If so import it as a matrix
+			data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+		  }
+		  
+		  if (ncol(data) > 16) {
+			return()
+		  }
+		  
+		  if (as.character(input$criterion) %in% input$predictors) {
+			return()
+		  }
+		  
+		  if (length(input$predictors) < 2) {
+			return()
+		  }
+		  
+		  rxx <- dget("rxx.R")
 
+		  predictors <- as.numeric(input$predictors)
+		  criterion <- as.numeric(input$criterion)
+
+		  temp1 <- capture.output(rxx(data, predictors, criterion))
 
       }
+
+
+
+
+
 
       if (temp1 != values$output[[length(values$output)]]) {
         values$output[[length(values$output)+1]] <- temp1

@@ -34,11 +34,12 @@ shinyUI(fluidPage(theme = "simplex.css",
                    "Random Regressor Confidence Interval" = "ci2",
                    "Power Analysis" = "pa",
                    "Necessary Sample Size" = "ssc",
-                   "Squared Multiple Correlation" = "rxx"
+                   "Standardized Coefficient Confidence Interval" = "b",
+                   "Squared Multiple Correlation" = "r2"
                  )
     ),
     HTML("<hr>"),
-    conditionalPanel(condition = "input.calculation == 'rxx'", fileInput("datafile", "Correlation file:")),
+    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", fileInput("datafile", "Correlation file:")),
     conditionalPanel(condition = "input.calculation == 'rxx'", textInput("Nobs", "Sample size:")),
     uiOutput("valueInput"),
     conditionalPanel(condition = "input.calculation != 'rxx'", HTML("<hr>")),
