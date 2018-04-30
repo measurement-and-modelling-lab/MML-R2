@@ -1,6 +1,7 @@
 function(X = NULL, y = NULL,
 				cov.x = NULL, cov.xy = NULL,
 				var.y = NULL, Nobs = NULL,
+				criterion = NULL, predictors = NULL,
 				alpha = .05, digits = 3) {
 
 tablegen <- dget("tablegen.r")
@@ -130,10 +131,9 @@ beta <- diag(sx) %*% bu * sy^-1
 for(i in 1:p) CIs[i,] <- c(beta[i] - tc * DELse[i], beta[i], beta[i] + tc * DELse[i])
 CIs <- round(as.matrix(CIs), 3)
 CIs <- rbind(c("Lower Bound", "Estimate", "Upper Bound"), CIs)
-CIs <- cbind(c('', paste("&beta;<sub>", 1:p, "</sub>", sep='')), CIs)
-
-#return(CIs)
+CIs <- cbind(c('', paste("&beta;<sub>", predictors, "</sub>", sep='')), CIs)
 
 cat('<center><b>', 100* (1 - alpha), '% CIs for Standardized Regression Coefficients:</b>', sep="")
 tablegen(CIs, TRUE)
+cat('<i>Y = ', criterion, ', X = ', paste(predictors, collapse=','), '</i></center>', sep="")
 }

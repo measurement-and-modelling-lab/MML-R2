@@ -11,10 +11,10 @@ function (data, X, Y) {
 	b <- solve(Rxx) %*% Rxy
 	b <- round(b, 3)
 	R2 <- t(b) %*% Rxy
-	#R2 <- round(R2, 3)
+	R2 <- round(R2, 3)
 	R2 <- cbind('R<sup>2</sup>', R2)
 
 	cat('<center><div style="line-height: 175%;"><b>Squared Multiple Correlation</b></div>')
-	tablegen(R2, TRUE)
-    cat('<i>Y = ', Y, ', X = ', paste(X, collapse=', '), '</i></center>', sep="")
+	tablegen(R2, FALSE)
+    cat('<i>Y = ', Y, ', X = ', paste(X, collapse=','), '</i></center>', sep="")
 }

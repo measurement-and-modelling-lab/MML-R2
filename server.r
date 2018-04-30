@@ -225,7 +225,7 @@ shinyServer(function(input, output, session) {
 		  
 		  corrmatrix <- cor(data)
 
-		  temp1 <- capture.output(rxx(X=X, y=Y, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, Nobs=Nobs))
+		  temp1 <- capture.output(rxx(X=X, y=Y, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, Nobs=Nobs, criterion=criterion, predictors=predictors))
 
 
       } else if (input$calculation == "r2") {
