@@ -72,7 +72,8 @@ shinyServer(function(input, output, session) {
 			variables <- ncol(data)
 
 			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
-			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)))
+			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", textInput("confidence", "Confidence Level:", values$confidence)), '<br>')
+			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)))
 			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
 
       } else if (values$calculation == "r2") {
@@ -196,21 +197,22 @@ shinyServer(function(input, output, session) {
 		  }, finally = {
 		  })
 		  if ('problem' %in% result) {
-			return(capture.output(cat('<br>Error: There was an problem reading data file #1; it may not be a .csv file.', sep="")))
+	      	return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
 		  } else { # If so import it as a matrix
+
 			data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
 		  }
 		  
 		  if (ncol(data) > 16) {
-			return()
+	      	return(capture.output(cat('<center><b><font color="red">Error: You cannot have more than 16 variables.</font></b></center>')))
 		  }
 		  
 		  if (as.character(input$criterion) %in% input$predictors) {
-			return()
+	      	return(capture.output(cat('<center><b><font color="red">Error: A variable cannot be both a predictor and the criterion.</font></b></center>')))
 		  }
 		  
 		  if (length(input$predictors) < 2) {
-			return()
+	      	return(capture.output(cat('<center><b><font color="red">Error: You must have at least two predictors.</font></b></center>')))
 		  }
 		  
 		  rxx <- dget("stdb.R")
@@ -226,10 +228,10 @@ shinyServer(function(input, output, session) {
 		  cov.xy <- cov(X, Y)
 		  var.y <- var(Y)
 		  Nobs <- as.numeric(input$Nobs)
-		  
+		  alpha <- 1 - as.numeric(input$confidence) 
 		  corrmatrix <- cor(data)
 
-		  temp1 <- capture.output(rxx(X=X, y=Y, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, Nobs=Nobs, criterion=criterion, predictors=predictors))
+		  temp1 <- capture.output(rxx(X=X, y=Y, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, Nobs=Nobs, criterion=criterion, predictors=predictors, alpha=alpha))
 
 
       } else if (input$calculation == "r2") {
@@ -247,21 +249,21 @@ shinyServer(function(input, output, session) {
 		  }, finally = {
 		  })
 		  if ('problem' %in% result) {
-			return(capture.output(cat('<br>Error: There was an problem reading data file #1; it may not be a .csv file.', sep="")))
+	      	return(capture.output(cat('<center><b><font color="red">Error: You must have at least two predictors.</font></b></center>')))
 		  } else { # If so import it as a matrix
 			data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
 		  }
 		  
 		  if (ncol(data) > 16) {
-			return()
+	      	return(capture.output(cat('<center><b><font color="red">Error: You cannot have more than 16 variables.</font></b></center>')))
 		  }
 		  
 		  if (as.character(input$criterion) %in% input$predictors) {
-			return()
+	      	return(capture.output(cat('<center><b><font color="red">Error: A variable cannot be both a predictor and the criterion.</font></b></center>')))
 		  }
 		  
 		  if (length(input$predictors) < 2) {
-			return()
+	      	return(capture.output(cat('<center><b><font color="red">Error: You must have at least two predictors.</font></b></center>')))
 		  }
 		  
 		  rxx <- dget("rxx.R")

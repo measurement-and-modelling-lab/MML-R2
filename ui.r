@@ -20,10 +20,6 @@ shinyUI(fluidPage(theme = "simplex.css",
                       padding-bottom: 0px;
                       color: #717171;
                     }
-					sup {
-						vertical-align: 75%;
-						font-size: smaller;
-					}
                     "))
     ),
 
@@ -32,17 +28,17 @@ shinyUI(fluidPage(theme = "simplex.css",
   sidebarLayout(
   sidebarPanel(
   	selectInput("calculation", "Calculation to run:",
-                 c("Fixed Regressor Confidence Interval" = "ci1",
-                   "Random Regressor Confidence Interval" = "ci2",
-                   "Power Analysis" = "pa",
+                 c("Confidence Interval (Fixed Regressor)" = "ci1",
+                   "Confidence Interval (Random Regressor)" = "ci2",
+                   "Power" = "pa",
                    "Necessary Sample Size" = "ssc",
-                   "Standardized Coefficient Confidence Interval" = "b",
+                   "Standardized Coefficient" = "b",
                    "Squared Multiple Correlation" = "r2"
                  )
     ),
     HTML("<hr>"),
     conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", fileInput("datafile", "Correlation file:")),
-    conditionalPanel(condition = "input.calculation == 'rxx'", textInput("Nobs", "Sample size:")),
+    #conditionalPanel(condition = "input.calculation == 'b'", textInput("balpha", "Alpha:")),
     uiOutput("valueInput"),
     HTML("<hr>"),
 	actionButton("runButton", "Run")
