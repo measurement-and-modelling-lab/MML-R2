@@ -37,10 +37,12 @@ shinyUI(fluidPage(theme = "simplex.css",
                  )
     ),
     HTML("<hr>"),
-    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", fileInput("datafile", "Raw data (headerless .csv format):")),
+    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", fileInput("datafile", "Data:")),
     uiOutput("valueInput"),
     HTML("<hr>"),
-	actionButton("runButton", "Run")
+	actionButton("runButton", "Run"),
+    HTML("<br><br>"),
+    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", helpText("Note: data should raw (row = observation, column = variable) and in headerless, .csv format."))
   ),
   
   mainPanel(

@@ -133,7 +133,7 @@ CIs <- round(as.matrix(CIs), digits)
 CIs <- rbind(c("Lower Bound", "Estimate", "Upper Bound"), CIs)
 CIs <- cbind(c('', paste("&beta;<sub>", predictors, "</sub>", sep='')), CIs)
 
-cat('<center><b>', 100*(1 - alpha), '% Standardized Coefficient Estimates:</b>', sep="")
+cat('<center><b>Standardized Coefficient Estimates (', 100*(1-alpha), '% CI):</b>', sep="")
 tablegen(CIs, TRUE)
 cat('<i>Y = ', criterion, ', X = ', paste(predictors, collapse=','), '</i></center>', sep="")
 }
