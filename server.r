@@ -1,57 +1,56 @@
 shinyServer(function(input, output, session) {
 
 	# Global values
-    values <- reactiveValues()
-    values$n <- ""
-    values$k <- ""
-    values$r <- ""
-    values$rho <- ""
-    values$confidence <- ""
-    values$alpha <- ""
-    values$power <- ""
-    values$percentage <- ""
-    values$calculation <- ""
+	values <- reactiveValues()
+	values$n <- ""
+	values$k <- ""
+	values$r <- ""
+	values$rho <- ""
+	values$confidence <- ""
+	values$alpha <- ""
+	values$power <- ""
+	values$percentage <- ""
+	values$calculation <- ""
 	values$predictors <- ""
 	values$criterion <- ""
-    values$output <-list('')
+	values$output <-list('')
 
     output$valueInput <- renderUI({
 
-	  # Create input widgets for global calculation value, with default values from global
-      html_ui <- ""
-      if (values$calculation == "ci1") {
-        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          textInput("k", "Number of variables, including criterion:", values$k),
-                          textInput("r", "R squared:", values$r),
-                          textInput("confidence", "Confidence level:", values$confidence))
-      } else if (values$calculation == "ci2") {
-        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          textInput("k", "Number of variables, including criterion:", values$k),
-                          textInput("r", "R squared:", values$r),
-                          textInput("confidence", "Confidence level:", values$confidence))
-      } else if (values$calculation == "pa") {
-        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          textInput("k", "Number of variables, including criterion:", values$k),
-                          textInput("rho", "Rho squared:", values$rho),
-                          textInput("alpha", "Alpha:", values$alpha))
-      } else if (values$calculation == "ssc") {
-        html_ui <- paste0(textInput("k", "Number of variables, including criterion:", values$k),
-                          textInput("rho", "Rho squared:", values$rho),
-                          textInput("alpha", "Alpha:", values$alpha),
-                          textInput("power", "Power desired:", values$power))
+		# Create input widgets for global calculation value, with default values from global
+      	html_ui <- ""
+      	if (values$calculation == "ci1") {
+        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          	  textInput("k", "Number of variables, including criterion:", values$k),
+                          	  textInput("r", "R squared:", values$r),
+                          	  textInput("confidence", "Confidence level:", values$confidence))
+        } else if (values$calculation == "ci2") {
+        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          	  textInput("k", "Number of variables, including criterion:", values$k),
+                          	  textInput("r", "R squared:", values$r),
+                          	  textInput("confidence", "Confidence level:", values$confidence))
+		} else if (values$calculation == "pa") {
+			html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                          	  textInput("k", "Number of variables, including criterion:", values$k),
+                              textInput("rho", "Rho squared:", values$rho),
+                              textInput("alpha", "Alpha:", values$alpha))
+		} else if (values$calculation == "ssc") {
+        	html_ui <- paste0(textInput("k", "Number of variables, including criterion:", values$k),
+                          	  textInput("rho", "Rho squared:", values$rho),
+                              textInput("alpha", "Alpha:", values$alpha),
+                              textInput("power", "Power desired:", values$power))
       } else if (values$calculation == "ppc") {
-        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          textInput("k", "Number of variables, including criterion:", values$k),
-                          textInput("rho", "Rho squared:", values$rho),
-                          textInput("percentage", "Percentage point desired:", values$percentage))
+        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                              textInput("k", "Number of variables, including criterion:", values$k),
+                              textInput("rho", "Rho squared:", values$rho),
+                              textInput("percentage", "Percentage point desired:", values$percentage))
       } else if (values$calculation == "pic") {
-        html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          textInput("k", "Number of variables, including criterion:", values$k),
-                          textInput("r", "R squared:", values$r),
-                          textInput("rho", "Rho squared:", values$rho))
+        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                              textInput("k", "Number of variables, including criterion:", values$k),
+                              textInput("r", "R squared:", values$r),
+                              textInput("rho", "Rho squared:", values$rho))
       } else if (values$calculation == "b") {
         
-			# Import data file
 			validate(need(input$datafile, ""))
 
 			# Check that R can read the data file as a .csv
@@ -61,7 +60,6 @@ shinyServer(function(input, output, session) {
 				'problem'
 			}, error = function(e) {
 				'problem'
-			}, finally = {
 			})
 			if ('problem' %in% result) {
 				return()
@@ -71,14 +69,13 @@ shinyServer(function(input, output, session) {
 
 			variables <- ncol(data)
 
-			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
-			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", textInput("confidence", "Confidence Level:", values$confidence)), '<br>')
-			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)))
-			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
+			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8", "9" = "9", "10" = "10", "11" = "11", "12" = "12", "13" = "13", "14" = "14", "15" = "15", "16" = "16")
+            html_ui <- paste0(textInput("confidence", "Confidence level:", values$confidence),
+							  div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)),
+							  div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
 
       } else if (values$calculation == "r2") {
         
-			# Import data file
 			validate(need(input$datafile, ""))
 
 			# Check that R can read the data file as a .csv
@@ -88,7 +85,6 @@ shinyServer(function(input, output, session) {
 				'problem'
 			}, error = function(e) {
 				'problem'
-			}, finally = {
 			})
 			if ('problem' %in% result) {
 				return()
@@ -98,7 +94,7 @@ shinyServer(function(input, output, session) {
 
 			variables <- ncol(data)
 
-			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8")
+			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8", "9" = "9", "10" = "10", "11" = "11", "12" = "12", "13" = "13", "14" = "14", "15" = "15", "16" = "16")
 			html_ui <- paste0(div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)))
 			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
 
@@ -106,7 +102,7 @@ shinyServer(function(input, output, session) {
       HTML(html_ui)
     })
     
-	# If calculation is changed, send current widget values to global, then update global calculation value to change the input widgets
+	# If calculation is changed, send current widget values to global, then update global calculation value to whatever calculator it's changing to
     observeEvent(input$calculation, {
       values$n <- input$n
       values$k <- input$k
@@ -131,9 +127,9 @@ shinyServer(function(input, output, session) {
           ErrorCheck <- dget("ErrorCheck.R")
           test <- ErrorCheck(input$calculation, input$n, input$k, input$r, input$confidence)
           if (is.null(test)) {
-              temp1 <- '<center><b><font color="red">Error: Invalid input.</font></b></center>'
+              return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
           } else if (as.numeric(input$confidence) <= .6 || as.numeric(input$confidence) >= .999) {
-              temp1 <- '<center><b><font color="red">Error: Confidence Level must be between .60 and .999, inclusive.</font></b></center>'
+              return(capture.output(cat('<center><b><font color="red">Error: Confidence Level must be between .60 and .999, inclusive.</font></b></center>')))
           } else {
               ConfidenceInterval <- dget("ConfidenceInterval.R")
               temp1 <- capture.output(ConfidenceInterval(input$n, input$k, input$r, input$confidence))
@@ -147,12 +143,12 @@ shinyServer(function(input, output, session) {
         ErrorCheck <- dget("ErrorCheck.R")
         test <- ErrorCheck(input$calculation, input$n, input$k, input$r, input$confidence)
         if (is.null(test)) {
-          temp1 <- '<center><b><font color="red">Error: Invalid input.</font></b></center>'
+            return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
         }else if (as.numeric(input$confidence) <= .6 || as.numeric(input$confidence) >= .999) {
-          temp1 <- '<center><b><font color="red">Error: Confidence Level must be between .60 and .999, inclusive.</font></b></center>'
+            return(capture.output(cat('<center><b><font color="red">Error: Confidence Level must be between .60 and .999, inclusive.</font></b></center>')))
         } else {
-          ConfidenceInterval2 <- dget("ConfidenceInterval2.R")
-          temp1 <- capture.output(ConfidenceInterval2(input$n, input$k, input$r, input$confidence))
+            ConfidenceInterval2 <- dget("ConfidenceInterval2.R")
+            temp1 <- capture.output(ConfidenceInterval2(input$n, input$k, input$r, input$confidence))
         }
         
       } else if (input$calculation == "pa") {
@@ -163,7 +159,7 @@ shinyServer(function(input, output, session) {
           ErrorCheck <- dget("ErrorCheck.R")
           test <- ErrorCheck(input$calculation, input$n, input$k, input$rho, input$alpha)
           if (is.null(test)) {
-              temp1 <- '<center><b><font color="red">Error: Invalid input.</font></b></center>'
+          	  return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
           } else {
               Power <- dget("Power.R")
               temp1 <- capture.output(Power(input$n, input$k, input$rho, input$alpha))
@@ -177,7 +173,7 @@ shinyServer(function(input, output, session) {
           ErrorCheck <- dget("ErrorCheck.R")
           test <- ErrorCheck(input$calculation, input$k, input$rho, input$alpha, input$power)
           if (is.null(test)) {
-              temp1 <- '<center><b><font color="red">Error: Invalid input.</font></b></center>'
+          	  return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
           } else {
               SampleSize <- dget("SampleSize.R")
               temp1 <- capture.output(SampleSize(input$k, input$rho, input$alpha, input$power))
@@ -186,6 +182,7 @@ shinyServer(function(input, output, session) {
 		  validate(need(input$datafile, ""))
 		  validate(need(input$predictors, ""))
 		  validate(need(input$criterion, ""))
+		  validate(need(input$confidence, ""))
 
 		  # Check that R can read the data file as a .csv
 		  result = tryCatch({
@@ -206,6 +203,10 @@ shinyServer(function(input, output, session) {
 		  if (ncol(data) > 16) {
 	      	return(capture.output(cat('<center><b><font color="red">Error: You cannot have more than 16 variables.</font></b></center>')))
 		  }
+
+		  if (ncol(data) >= nrow(data)) {
+	      	return(capture.output(cat('<center><b><font color="red">Error: Either your data is a correlation matrix or p >= N.</font></b></center>')))
+		  }
 		  
 		  if (as.character(input$criterion) %in% input$predictors) {
 	      	return(capture.output(cat('<center><b><font color="red">Error: A variable cannot be both a predictor and the criterion.</font></b></center>')))
@@ -214,24 +215,21 @@ shinyServer(function(input, output, session) {
 		  if (length(input$predictors) < 2) {
 	      	return(capture.output(cat('<center><b><font color="red">Error: You must have at least two predictors.</font></b></center>')))
 		  }
+
+		  if (NA %in% as.numeric(data)) {
+	      	return(capture.output(cat('<center><b><font color="red">Error: Your data has missing or non-numeric elements.</font></b></center>')))
+		  }
 		  
-		  rxx <- dget("stdb.R")
-		  tablegen <- dget("tablegen.r")
 		  
 		  predictors <- as.numeric(input$predictors)
 		  criterion <- as.numeric(input$criterion)
 		  
 		  X <- data[,predictors]
-		  Y <- data[,criterion]
+		  y <- data[,criterion]
+		  alpha <- 1 - as.numeric(input$confidence)
 
-		  cov.x <- cov(X)
-		  cov.xy <- cov(X, Y)
-		  var.y <- var(Y)
-		  Nobs <- as.numeric(input$Nobs)
-		  alpha <- 1 - as.numeric(input$confidence) 
-		  corrmatrix <- cor(data)
-
-		  temp1 <- capture.output(rxx(X=X, y=Y, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, Nobs=Nobs, criterion=criterion, predictors=predictors, alpha=alpha))
+		  stdb <- dget("stdb.R")
+		  temp1 <- capture.output(stdb(X=X, y=y, criterion=criterion, predictors=predictors, alpha=alpha))
 
 
       } else if (input$calculation == "r2") {
@@ -257,6 +255,10 @@ shinyServer(function(input, output, session) {
 		  if (ncol(data) > 16) {
 	      	return(capture.output(cat('<center><b><font color="red">Error: You cannot have more than 16 variables.</font></b></center>')))
 		  }
+
+		  if (NA %in% as.numeric(data)) {
+	      	return(capture.output(cat('<center><b><font color="red">Error: Your data has missing or non-numeric elements.</font></b></center>')))
+		  }
 		  
 		  if (as.character(input$criterion) %in% input$predictors) {
 	      	return(capture.output(cat('<center><b><font color="red">Error: A variable cannot be both a predictor and the criterion.</font></b></center>')))
@@ -278,8 +280,7 @@ shinyServer(function(input, output, session) {
 
 
 
-
-
+	  # only show last 20 output
       if (temp1 != values$output[[length(values$output)]]) {
         values$output[[length(values$output)+1]] <- temp1
         if (length(values$output) > 19) {

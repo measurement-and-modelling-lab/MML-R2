@@ -32,13 +32,12 @@ shinyUI(fluidPage(theme = "simplex.css",
                    "Confidence Interval (Random Regressor)" = "ci2",
                    "Power" = "pa",
                    "Necessary Sample Size" = "ssc",
-                   "Standardized Coefficient" = "b",
+                   "Standardized Coefficients" = "b",
                    "Squared Multiple Correlation" = "r2"
                  )
     ),
     HTML("<hr>"),
-    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", fileInput("datafile", "Correlation file:")),
-    #conditionalPanel(condition = "input.calculation == 'b'", textInput("balpha", "Alpha:")),
+    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", fileInput("datafile", "Raw data (headerless .csv format):")),
     uiOutput("valueInput"),
     HTML("<hr>"),
 	actionButton("runButton", "Run")
