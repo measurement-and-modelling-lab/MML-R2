@@ -28,12 +28,12 @@ shinyUI(fluidPage(theme = "simplex.css",
   sidebarLayout(
   sidebarPanel(
   	selectInput("calculation", "Calculation to run:",
-                 c("Confidence Interval (Fixed Regressor)" = "ci1",
-                   "Confidence Interval (Random Regressor)" = "ci2",
-                   "Power" = "pa",
-                   "Necessary Sample Size" = "ssc",
-                   "Standardized Coefficients" = "b",
-                   "Squared Multiple Correlation" = "r2"
+                 c("Confidence interval on R^2 (Fixed Regressor)" = "ci1",
+                   "Confidence interval on R^2 (Random Regressor)" = "ci2",
+                   "Power to reject R^2 = 0" = "pa",
+                   "Sample size to reject R^2 = 0" = "ssc",
+                   "Standardized regression coefficients" = "b",
+                   "Squared multiple correlation" = "r2"
                  )
     ),
     HTML("<hr>"),
@@ -42,7 +42,7 @@ shinyUI(fluidPage(theme = "simplex.css",
     HTML("<hr>"),
 	actionButton("runButton", "Run"),
     HTML("<br><br>"),
-    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", helpText("Note: data should raw (row = observation, column = variable) and in headerless, .csv format."))
+    conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'b'", helpText("Note: Your data can either be raw data (row = observation, column = variable), a correlation matrix, or a covariance matrix. It should be in headerless, .csv format."))
   ),
   
   mainPanel(
