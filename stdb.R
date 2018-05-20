@@ -2,7 +2,7 @@ function(X = NULL, y = NULL,
 				cov.x = NULL, cov.xy = NULL,
 				var.y = NULL, Nobs = NULL,
 				criterion = NULL, predictors = NULL,
-				alpha = .05, digits = 5) {
+				alpha = .05, digits = 3, familywise = 'uncorrected') {
 
 tablegen <- dget("tablegen.r")
 
@@ -46,7 +46,9 @@ ncovs <- length(param)
 
 # Find the vector element numbers for the variances of X
 v.x.p1 <- c(1, rep(0, p - 1))
-for(i in 2:p) v.x.p1[i] <- v.x.p1[i - 1] + p - (i - 2)
+for(i in 2:p) {
+	v.x.p1[i] <- v.x.p1[i - 1] + p - (i - 2)
+}
 
 # Store covariances and variances to use in the derivatives
 
@@ -81,7 +83,7 @@ invcx<-solve(cx)
 PART3<-diag(sx / sy) %*% kronecker(t(bu),t(invcx)) %*% Dn(p)
 
 
-#fouladi degug
+#fouladi debug
 #original db[, 1:ncx] <- (diag(c(solve(diag(2 * sx * sy)) %*% bu)) %*% V -
 #original 				diag(sx / sy) %*% (t(bu) %*% solve(cx)) %*% Dn(p))
 #fouladifix line below by refering to original article Yuan and Chan 2011 with modification, see above for
@@ -93,7 +95,7 @@ db[, 1:ncx] <- ((PART1 %*% PART2) -
 #fouladifix line below below by refering to original article Yuan and Chan 2011 with modification, 
 #using Yuan and Chan article magnitudes off 
 #     db[, (ncx+1):(ncx+p)] <- diag(sx / sy) %*% t(cx)
-#following JOnes/Waller am using solve(cx) in a new variable called invcx
+#following Jones/Waller am using solve(cx) in a new variable called invcx
 db[, (ncx+1):(ncx+p)] <- diag(sx / sy) %*% t(invcx)
 
 db[,ncovs] <- -diag(sx / (2 * sy^3)) %*% bu
@@ -103,8 +105,15 @@ db[,ncovs] <- -diag(sx / (2 * sy^3)) %*% bu
 cx.nms <- matrix(0, p, p)
 cxy.nms <- c(rep(0, p), "var_y")
 
-for(i in 1:p) for(j in 1:p) cx.nms[i, j] <- paste("cov_x", i, "x", j, sep='')
-for(i in 1:p) cxy.nms[i] <- paste("cov_x", i, "y", sep='')
+for(i in 1:p) {
+	for(j in 1:p) {
+		cx.nms[i, j] <- paste("cov_x", i, "x", j, sep='')
+	}
+}
+
+for(i in 1:p) {
+	cxy.nms[i] <- paste("cov_x", i, "y", sep='')
+}
 
 old.ord <- c(vech(cx.nms), cxy.nms)
 new.ord <- vech(rbind(cbind(cx.nms, cxy.nms[1:p]), c(cxy.nms)))
@@ -117,23 +126,95 @@ db <- db[, match(new.ord, old.ord)]
 DEL.cmat <- db %*% cov.cov %*% t(db) / (N - 3)
 b.nms <- NULL
 
-#fouladi debugg
+#fouladi debug
 # there was a typo, I changed patse to paste function
-for(i in 1:p) b.nms[i] <- paste("beta_", i, sep='')
+for(i in 1:p) {
+	b.nms[i] <- paste("beta_", i, sep='')
+}
 rownames(DEL.cmat) <- colnames(DEL.cmat) <- b.nms
 
 # compute standard errors of confidence intervals
 
 DELse <- sqrt(diag(DEL.cmat))
 CIs <- as.data.frame(matrix(0, p, 3))
-tc <- qt(alpha / 2, N-p-1, lower = F)
-beta <- diag(sx) %*% bu * sy^-1
-for(i in 1:p) CIs[i,] <- c(beta[i] - tc * DELse[i], beta[i], beta[i] + tc * DELse[i])
-CIs <- round(as.matrix(CIs), digits)
-CIs <- rbind(c("Lower Bound", "Estimate", "Upper Bound"), CIs)
-CIs <- cbind(c('', paste("&beta;<sub>", predictors, "</sub>", sep='')), CIs)
 
-cat('<center><b>Standardized Coefficient Estimates (', 100*(1-alpha), '% CI):</b>', sep="")
+
+
+
+beta <- diag(sx) %*% bu * sy^-1
+test.statistic <- abs(beta / DELse)
+p.values <- dt(test.statistic, df=Nobs-1)
+
+# Familywise error control
+#methods <- c('uncorrected', 'bonferroni', 'stepdown_bonferroni', 'sidak', 'stepdown_sidak')
+
+beta.ranking <- rank(-abs(beta))
+number.of.predictors <- length(cov.xy)
+
+if (familywise == 'uncorrected') {
+	alpha <- rep(alpha, number.of.predictors)
+} else if (familywise == 'bonferroni') {
+	alpha.modifier <- rep(number.of.predictors, number.of.predictors)
+	alpha <- alpha / alpha.modifier
+} else if (familywise == 'stepdown_bonferroni') {
+	alpha <- alpha / (number.of.predictors - beta.ranking + 1)
+} else if (familywise == 'sidak') {
+	alpha <- 1 - (1 - alpha)^(1 / number.of.predictors)
+	alpha <- rep(alpha, number.of.predictors)
+} else { # stepdown_sidak
+	alpha <- 1 - (1 - alpha)^(1 / (number.of.predictors - (beta.ranking - 1)))
+}
+
+if (familywise %in% c('stepdown_bonferroni', 'stepdown_sidak')) {
+	# extract the alphas that are greater than their respective p values
+	# make them equal to the least among them
+	comparison.matrix <- cbind(p.values, alpha)
+	comparison.matrix[comparison.matrix[,1] > comparison.matrix[,2], 2] <- min(comparison.matrix[comparison.matrix[,1] > comparison.matrix[,2], 2])
+	alpha <- comparison.matrix[,2]
+}
+
+tc <- qt(alpha/2, N-p-1, lower = F)
+
+for (i in 1:p) {
+	CIs[i,] <- c(beta[i] - tc[i] * DELse[i], beta[i], beta[i] + tc[i] * DELse[i])
+}
+
+CIs <- round(CIs, digits)
+DELse <- round(DELse, digits)
+alpha <- round(alpha, digits)
+p.values <- round(p.values, digits)
+
+CIs <- as.matrix(CIs)
+CIs <- rbind(c("", "", ""), CIs)
+CIs <- cbind(c('', paste("&beta;<sub>", 1:p, '</sub>', sep='')), CIs)
+
+CIs <- cbind(CIs[,1], paste0(CIs[,3], ' [', CIs[,2], ', ', CIs[,4], ']'))
+CIs[1,2] <- "Estimate"
+
+CIs <- list(CIs,
+						c('Std. error', DELse),
+						c('Alpha', alpha))
+CIs <- do.call(cbind, CIs)
+
+cat('<center><b>Standardized Coefficient Estimates:</b>', sep="")
 tablegen(CIs, TRUE)
 cat('<i>Y = ', criterion, ', X = ', paste(predictors, collapse=','), '</i></center>', sep="")
+
 }
+
+
+
+
+# rawdata <- read.csv("example1_data1.csv", header=F)
+# 
+# X <- rawdata[,1:5]
+# y <- rawdata[,6]
+# cov.x <- cor(X)
+# cov.xy <- cor(X, y)
+# var.y <- 1
+# Nobs <- nrow(rawdata)
+# 
+# DEL(X = NULL, y = NULL,
+# 	cov.x = cov.x, cov.xy = cov.xy,
+# 	var.y = var.y, Nobs = Nobs,
+# 	alpha = .05, digits = 3)

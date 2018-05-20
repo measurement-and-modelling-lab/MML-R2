@@ -76,6 +76,7 @@ shinyServer(function(input, output, session) {
 			}
             html_ui <- paste0(html_ui,
 							  textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95),
+							  radioButtons("familywise", "Familywise error control:", choices = c("None"="uncorrected", "Bonferroni"="bonferroni", "Dunn-Sidak"="sidak", "Stepdown Bonferroni"="stepdown_bonferroni", "Stepdown Dunn-Sidak"="stepdown_sidak")),
 							  div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)),
 							  div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
 
@@ -190,7 +191,8 @@ shinyServer(function(input, output, session) {
 		  validate(need(input$predictors, ""))
 		  validate(need(input$criterion, ""))
 		  validate(need(input$confidence, ""))
-
+		  validate(need(input$familywise, ""))
+		  
 		  # Check that R can read the data file as a .csv
 		  result = tryCatch({
 			read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
@@ -231,7 +233,9 @@ shinyServer(function(input, output, session) {
 		  
 		  predictors <- as.numeric(input$predictors)
 		  criterion <- as.numeric(input$criterion)
-		  
+
+		  familywise <- input$familywise
+
 		  cov.x <- data[predictors,predictors]
 		  cov.xy <- data[predictors,criterion]
 		  var.y <- data[criterion,criterion]
@@ -239,7 +243,7 @@ shinyServer(function(input, output, session) {
 		  alpha <- 1 - as.numeric(input$confidence)
 
 		  stdb <- dget("stdb.R")
-		  temp1 <- capture.output(stdb(X=NULL, y=NULL, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, criterion=criterion, predictors=predictors, alpha=alpha, Nobs=Nobs))
+		  temp1 <- capture.output(stdb(X=NULL, y=NULL, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, criterion=criterion, predictors=predictors, alpha=alpha, Nobs=Nobs, familywise=familywise))
 
 
       } else if (input$calculation == "r2") {
