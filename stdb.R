@@ -2,7 +2,7 @@ function(X = NULL, y = NULL,
 				cov.x = NULL, cov.xy = NULL,
 				var.y = NULL, Nobs = NULL,
 				criterion = NULL, predictors = NULL,
-				alpha = .05, digits = 3, familywise = 'uncorrected') {
+				alpha = .05, digits = 5, familywise = 'uncorrected') {
 
 tablegen <- dget("tablegen.r")
 
@@ -143,7 +143,7 @@ CIs <- as.data.frame(matrix(0, p, 3))
 
 beta <- diag(sx) %*% bu * sy^-1
 test.statistic <- abs(beta / DELse)
-p.values <- dt(test.statistic, df=Nobs-1)
+p.values <- pt(test.statistic, df=Nobs-p-1, lower.tail=FALSE)*2
 
 # Familywise error control
 #methods <- c('uncorrected', 'bonferroni', 'stepdown_bonferroni', 'sidak', 'stepdown_sidak')
@@ -183,6 +183,7 @@ CIs <- round(CIs, digits)
 DELse <- round(DELse, digits)
 alpha <- round(alpha, digits)
 p.values <- round(p.values, digits)
+test.statistic <- round(test.statistic, digits)
 
 CIs <- as.matrix(CIs)
 CIs <- rbind(c("", "", ""), CIs)
@@ -191,10 +192,10 @@ CIs <- cbind(c('', paste("&beta;<sub>", 1:p, '</sub>', sep='')), CIs)
 CIs <- cbind(CIs[,1], paste0(CIs[,3], ' [', CIs[,2], ', ', CIs[,4], ']'))
 CIs[1,2] <- "Estimate"
 
-CIs <- list(CIs,
-						c('Std. error', DELse),
-						c('Alpha', alpha))
-CIs <- do.call(cbind, CIs)
+DELse <- c('Std. error', DELse)
+test.statistic <- c('t(df);  p', paste0(test.statistic,'(',N-p-1,');  ',p.values))
+alpha <- c('Alpha', alpha)
+CIs <- cbind(CIs, DELse, test.statistic, alpha)
 
 cat('<center><b>Standardized Coefficient Estimates:</b>', sep="")
 tablegen(CIs, TRUE)

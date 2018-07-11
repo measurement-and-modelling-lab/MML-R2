@@ -22,8 +22,8 @@ shinyUI(fluidPage(theme = "simplex.css",
                     }
                     "))
     ),
-
-  headerPanel('MML-R2', windowTitle = 'MML - R-Squared'),
+    
+  headerPanel('', windowTitle = 'MML - R-Squared'),
 
   sidebarLayout(
   sidebarPanel(
@@ -49,15 +49,6 @@ shinyUI(fluidPage(theme = "simplex.css",
 	htmlOutput("r2Output")
   )),
 
-  HTML('<br>'),
-  HTML('<link rel="stylesheet" type="text/css" href="index.css">
-		<div class="bar2">
-		<b class="bottom">
-     	<font color="#717171">Provided by the</font>
-     	<a href="http://members.psyc.sfu.ca/labs/mml"><font color=white>Measurement and Modelling Lab</font></a>
-     	<font color="#717171"> at</font>
-     	<a href="https://www.sfu.ca/"><font color=white> SFU</font></a>
-     	</b>
-    	</div><br>')
+  HTML('<br>')
 )
 )
