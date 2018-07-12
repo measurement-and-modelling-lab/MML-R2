@@ -15,9 +15,9 @@ shinyUI(fluidPage(theme = "simplex.css",
     <title>Analytics^2 - About</title>
          <div class="bar">
     <b class="title">Measurement and Modelling Lab &nbsp; - &nbsp; Tools</b><br class="rwd-break"><b class="link">
-    <a href="https://shiny.rcg.sfu.ca/u/pserafin/rsquared/"><font color="#00ca8a">R SQUARED</font></a>
-    &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/wbcorr/"><font color="white">WBCORR</font></a>
-    &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/csvgenerator/"><font color="white">CSVGenerator</font></a>
+    <a href="https://shiny.rcg.sfu.ca/u/pserafin/rsquared/"><font color="#00ca8a">MML-R2</font></a>
+    &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/wbcorr/"><font color="white">MML-WBCORR</font></a>
+    &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/csvgenerator/"><font color="white">CSV Generator</font></a>
 
 
 
@@ -41,6 +41,7 @@ shinyUI(fluidPage(theme = "simplex.css",
                     line-height: 1.1;
                     color: #333;
                     }
+                    body { min-width: 450px; }
                     td {
                       white-space: nowrap;
                       width: 1px;
@@ -58,12 +59,12 @@ shinyUI(fluidPage(theme = "simplex.css",
   sidebarLayout(
   sidebarPanel(
   	selectInput("calculation", "Calculation to run:",
-                 c("Confidence interval on R^2 (Fixed Regressor)" = "ci1",
-                   "Confidence interval on R^2 (Random Regressor)" = "ci2",
-                   "Power to reject R^2 = 0" = "pa",
-                   "Sample size to reject R^2 = 0" = "ssc",
-                   "Standardized regression coefficients" = "b",
-                   "Squared multiple correlation" = "r2"
+                 c("Confidence interval on R2 (fixed regressor)" = "ci1",
+                   "Confidence interval on R2 (random regressor)" = "ci2",
+                   "Power to reject H0: R2 = 0" = "pa",
+                   "Sample size to reject HO: R2 = 0" = "ssc",
+                   "Estimate standardized regression coefficients" = "b",
+                   "Calculate R2 from raw data" = "r2"
                  )
     ),
     HTML("<hr>"),
