@@ -1,4 +1,5 @@
-library(shinythemes)
+require(shiny) || install.packages(shiny)
+require(shinythemes) || install.packages(shinythemes)
 
 shinyUI(fluidPage(theme = "simplex.css",
                   
@@ -52,7 +53,7 @@ shinyUI(fluidPage(theme = "simplex.css",
                     "))
     ),
     
-  headerPanel('', windowTitle = 'MML - R-Squared'),
+  headerPanel('', windowTitle = 'MML-R2'),
 
   sidebarLayout(
   sidebarPanel(
