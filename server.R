@@ -81,7 +81,7 @@ shinyServer(function(input, output, session) {
     values$calculation <- ""
     values$predictors <- ""
     values$criterion <- ""
-    values$old.output <-list('','','','','','','','','','')
+    values$old.output <-c("","","","","","","","","","")
 
     output$valueInput <- renderUI({
 
@@ -344,22 +344,22 @@ shinyServer(function(input, output, session) {
 
             ## Define arguments
             if (ncol(data) != nrow(data)) {
-                Nobs <- nrow(data)
+                N <- nrow(data)
                 data <- cov(data)
             } else {
                 areIntegers(input$n)
-                Nobs <- as.numeric(input$n)
+                N <- as.numeric(input$n)
             }
             predictors <- as.numeric(input$predictors)
             criterion <- as.numeric(input$criterion)
             familywise <- input$familywise
-            cov.x <- data[predictors,predictors]
-            cov.xy <- data[predictors,criterion]
-            var.y <- data[criterion,criterion]
+            cx <- data[predictors, predictors]
+            cxy <- data[predictors, criterion]
+            vy <- data[criterion, criterion]
             alpha <- 1 - as.numeric(input$confidence)
 
             Beta <- dget("Beta.R")
-            new.output <- Beta(cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, criterion=criterion, predictors=predictors, alpha=alpha, Nobs=Nobs, familywise=familywise)
+            new.output <- Beta(cx, cxy, vy, N, alpha, familywise)
             foot <-paste0("Y=",criterion,", X=",paste(predictors, collapse=","))
             new.output <- htmlTable(new.output,
                                     css.cell = "padding-left: .5em; padding-right: .5em;",
@@ -394,13 +394,16 @@ shinyServer(function(input, output, session) {
             R2 <- dget("R2.R")
             new.output <- R2(data, predictors, criterion)
             new.output <- htmlTable(new.output,
-                                    caption = "R<sup>2</sup> Calculation",
+                                    caption = "Squared Multiple Correlation Calculation",
                                     tfoot = paste0("Y=", criterion, ", X=", paste(predictors, collapse=",")))
 
         }
 
         ## Print the current output plus the last 9
-        values$old.output <- c(new.output, values$old.output)[1:10]
+        ## But only if the new output is different from the previous one
+        if (new.output != values$old.output[1]) {
+            values$old.output <- c(new.output, values$old.output)[1:10]
+        }
         html_output <- paste(values$old.output, collapse="")
         HTML(html_output)
 
