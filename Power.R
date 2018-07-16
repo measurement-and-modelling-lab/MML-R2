@@ -1,10 +1,6 @@
 function(N, k, rho, alpha){
 
-    N <- as.numeric(N)
-    df1 <- as.numeric(k)-1
-    rho <- as.numeric(rho)
-    alpha <- as.numeric(alpha)
-
+    df1 <- k-1
     df2 = N - df1 - 1
     Fobs <- (rho/df1)/((1-rho)/(N-df1-1))
     nc = N*(rho/(1-rho))
@@ -23,8 +19,5 @@ function(N, k, rho, alpha){
     output.table <- matrix(power, nrow=1, ncol=1)
     colnames(output.table) <- "Power"
     return(output.table)
-
-    ##cat('<center><b>Power Calculation Results</b>')
-    ##cat('<i>N=',N,', k=',k, ', &rho;<sup>2</sup>=',rho,', &alpha;=',alpha,'</i></center>', sep="")
 
 }

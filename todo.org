@@ -1,0 +1,6 @@
+ - Fix erroneous input errors
+ - Make superscripts lower, so the "2" in R^2 doesn't overlap with the line above it
+ - Make the R^2 calculator's output less wimpy
+ - Put custom functions in their own file or files
+ - Clean up confidence interval calculation in Beta.R
+ - Add more comments to the calculation functions

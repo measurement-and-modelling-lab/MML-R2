@@ -1,11 +1,6 @@
 function (k, rho, alpha, power) {
 
-    k <- as.numeric(k)
-    alpha <- as.numeric(alpha)
-    rho <- as.numeric(rho)
-    power <- as.numeric(power)
     df1 <- k - 1
-    
     N = 1000
     i = 1
     increment = 1000 #Special value used for bijection range finding
@@ -19,20 +14,14 @@ function (k, rho, alpha, power) {
         Fobs <- (rho/df1)/((1-rho)/(N-df1-1))
         nc = N*(rho/(1-rho))
 
-        result = tryCatch({
+        tryCatch({
             qf(1-alpha,df1,df2)
         }, warning = function(w) {
-            'problem'
+            stop("Sample size calculation failed.")
         }, error = function(e) {
-            'problem'
-        }, finally = {
+            stop("Sample size calculation failed.")
         })
         
-        if ('problem' %in% result) {
-            cat('<center><br><b><font color="red">Error: Sample size calculation failed.</font></b></center><center><i>k=',k,', &rho;<sup>2</sup>=',rho, ', &alpha;=',alpha,', 1-&beta;=',power,'</center></i>', sep = "")
-            return(invisible(TRUE))
-        }
-
         fcrit <- qf(1-alpha,df1,df2)
         powerest <- 1-pf(fcrit,df1,df1,ncp=nc) #Power Estimate
         #Moified bijection
@@ -42,7 +31,7 @@ function (k, rho, alpha, power) {
         }
 
         else if (powerest < power) {
-            N <- N+increment #Increment the N estimate by increment until it goes above the Original estimate
+            N <- N+increment #Increment the N estimate by increment until it goes above the original estimate
         }
 
         if (abs(powerest-power) < tol) {
@@ -85,18 +74,12 @@ function (k, rho, alpha, power) {
     }
 
     
-  #Create formatted output
-    
+    ## Format output table
     output.table <- matrix(c(powerlow, powerhigh), nrow=1, ncol=2)
     rowname1 <- paste0("N = ", Nlow)
     rowname2 <- paste0("N = ", Nhigh)
     colnames(output.table) <- c(rowname1, rowname2)
     rownames(output.table) <- "<b>Power</b>"
     return(output.table)
-	
-    ## cat('<center><b>Sample Size Calculation Results</b>')
-    ## tablegen <- dget("tablegen.r")
-    ## tablegen(output_table,FALSE)
-    ## cat('<i>k=',k,', &rho;<sup>2</sup>=',rho, ', &alpha;=',alpha,', 1-&beta;=',power,'</center></i>', sep = "")
 
 }

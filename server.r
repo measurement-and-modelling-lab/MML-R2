@@ -4,6 +4,14 @@ require(htmlTable) || install.packages(htmlTable)
 
 shinyServer(function(input, output, session) {
 
+    ## Validate(Need()) 
+    massValidateNeed <- function(...) {
+        arguments <- list(...)
+        for (a in arguments) {
+            validate(need(a, ""))
+        }
+    }
+
     ## Determine whether several inputs are integers
     areIntegers <- function(...) {
         arguments <- list(...)
@@ -27,11 +35,11 @@ shinyServer(function(input, output, session) {
 
 
     ## Determine whether several numbers are valid correlations
-    areCorrelations <- function(...) {
+    areSquaredMCs <- function(...) {
         arguments <- list(...)
         for (a in arguments) {
             a <- as.numeric(a)
-            if (a < -1 || a > 1) {
+            if (a < 0 || a > 1) {
                 stop("Invalid input.")
             }
         }
@@ -216,15 +224,12 @@ shinyServer(function(input, output, session) {
         if (input$calculation == "fixedci") {
 
             ## Ensure that the necessary values have been entered
-            validate(need(input$n, ""))
-            validate(need(input$k, ""))
-            validate(need(input$r, ""))
-            validate(need(input$confidence, ""))
+            massValidateNeed(input$n, input$k, input$r, input$confidence)
 
             ## Error checking
             areIntegers(input$n, input$k)
             areNumeric(input$r, input$confidence)
-            areCorrelations(input$r)
+            areSquaredMCs(input$r)
             areValidCLs(input$confidence)
 
             ## Convert to numeric
@@ -245,15 +250,12 @@ shinyServer(function(input, output, session) {
         } else if (input$calculation == "randomci") {
 
             ## Ensure that the necessary values have been entered
-            validate(need(input$n, ""))
-            validate(need(input$k, ""))
-            validate(need(input$r, ""))
-            validate(need(input$confidence, ""))
+            massValidateNeed(input$n, input$k, input$r, input$confidence)
 
             ## Error checking
             areIntegers(input$n, input$k)
             areNumeric(input$r, input$confidence)
-            areCorrelations(input$r)
+            areSquaredMCs(input$r)
             areValidCLs(input$confidence)
 
             ## Convert to numeric
@@ -275,15 +277,12 @@ shinyServer(function(input, output, session) {
         } else if (input$calculation == "power") {
 
             ## Ensure that the necessary values have been entered
-            validate(need(input$n, ""))
-            validate(need(input$k, ""))
-            validate(need(input$rho, ""))
-            validate(need(input$alpha, ""))
+            massValidateNeed(input$n, input$k, input$rho, input$alpha)
 
             ## Error checking
             areIntegers(input$n, input$k)
             areNumeric(input$rho, input$alpha)
-            areCorrelations(input$rho)
+            areSquaredMCs(input$rho)
             areProbabilities(input$alpha)
 
             ## Convert to numeric
@@ -302,15 +301,12 @@ shinyServer(function(input, output, session) {
         } else if (input$calculation == "samplesize") {
 
             ## Ensure that the necessary values have been entered
-            validate(need(input$k, ""))
-            validate(need(input$rho, ""))
-            validate(need(input$alpha, ""))
-            validate(need(input$power, ""))
+            massValidateNeed(input$k, input$rho, input$alpha, input$power)
 
             ## Error checking
             areIntegers(input$n)
             areNumeric(input$rho, input$alpha, input$power)
-            areCorrelations(input$rho)
+            areSquaredMCs(input$rho)
             areProbabilities(input$alpha, input$power)
 
             ## Convert to numeric
@@ -331,12 +327,8 @@ shinyServer(function(input, output, session) {
         } else if (input$calculation == "beta") {
 
             ## Ensure that the necessary values have been entered
-            validate(need(input$datafile, ""))
-            validate(need(input$predictors, ""))
-            validate(need(input$criterion, ""))
-            validate(need(input$confidence, ""))
-            validate(need(input$familywise, ""))
-            
+            massValidateNeed(input$datafile, input$predictors, input$criterion, input$confidence, input$familywise)
+
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
             
             ## Error checking
@@ -379,9 +371,7 @@ shinyServer(function(input, output, session) {
         } else if (input$calculation == "r2") {
 
             ## Ensure that the necessary values have been entered
-            validate(need(input$datafile, ""))
-            validate(need(input$predictors, ""))
-            validate(need(input$criterion, ""))
+            massValidateNeed(input$datafile, input$predictors, input$criterion)
 
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
 
