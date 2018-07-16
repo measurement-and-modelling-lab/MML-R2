@@ -87,11 +87,16 @@ function (k, rho, alpha, power) {
     
   #Create formatted output
     
-	output_table <- matrix(c(paste0('Power (N = ', Nlow, ')'), paste0('Power (N = ', Nhigh, ')'), powerlow, powerhigh), nrow=2, ncol=2)
+    output.table <- matrix(c(powerlow, powerhigh), nrow=1, ncol=2)
+    rowname1 <- paste0("N = ", Nlow)
+    rowname2 <- paste0("N = ", Nhigh)
+    colnames(output.table) <- c(rowname1, rowname2)
+    rownames(output.table) <- "<b>Power</b>"
+    return(output.table)
 	
-    cat('<center><b>Sample Size Calculation Results</b>')
-    tablegen <- dget("tablegen.r")
-    tablegen(output_table,FALSE)
-    cat('<i>k=',k,', &rho;<sup>2</sup>=',rho, ', &alpha;=',alpha,', 1-&beta;=',power,'</center></i>', sep = "")
+    ## cat('<center><b>Sample Size Calculation Results</b>')
+    ## tablegen <- dget("tablegen.r")
+    ## tablegen(output_table,FALSE)
+    ## cat('<i>k=',k,', &rho;<sup>2</sup>=',rho, ', &alpha;=',alpha,', 1-&beta;=',power,'</center></i>', sep = "")
 
 }

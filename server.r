@@ -1,319 +1,423 @@
+require(shiny) || install.packages(shiny)
+require(shinythemes) || install.packages(shinythemes)
+require(htmlTable) || install.packages(htmlTable)
+
 shinyServer(function(input, output, session) {
 
-	# Global values
-	values <- reactiveValues()
-	values$n <- ""
-	values$k <- ""
-	values$r <- ""
-	values$rho <- ""
-	values$confidence <- ""
-	values$alpha <- ""
-	values$power <- ""
-	values$percentage <- ""
-	values$calculation <- ""
-	values$predictors <- ""
-	values$criterion <- ""
-	values$output <-list('')
+    ## Determine whether several inputs are integers
+    areIntegers <- function(...) {
+        arguments <- list(...)
+        for (a in arguments) {
+            if (grepl("\\D", a) || grepl("\\D", a)) {
+                stop("Invalid input.")
+            }
+        }
+    }
+
+    ## Determine whether several inputs are numeric
+    areNumeric <- function(...) {
+        arguments <- list(...)
+        for (a in arguments) {
+            a <- as.numeric(a)
+            if (is.na(a)) {
+                stop("Invalid input.")
+            }
+        }
+    }
+
+
+    ## Determine whether several numbers are valid correlations
+    areCorrelations <- function(...) {
+        arguments <- list(...)
+        for (a in arguments) {
+            a <- as.numeric(a)
+            if (a < -1 || a > 1) {
+                stop("Invalid input.")
+            }
+        }
+    }
+
+
+    ## Determine whether a confidence level is valid
+    areValidCLs <- function(...) {
+        arguments <- list(...)
+        for (a in arguments) {
+            a <- as.numeric(a)
+            if (a <= .6 || a >= .999) {
+                stop("Invalid input.")
+            }
+        }
+    }
+
+
+    areProbabilities <- function(...) {
+        arguments <- list(...)
+        for (a in arguments) {
+            a <- as.numeric(a)
+            if (a <= 0 || a >= 1) {
+                stop("Invalid input.")
+            }
+        }
+    }
+
+    ## Global values
+    values <- reactiveValues()
+    values$n <- ""
+    values$k <- ""
+    values$r <- ""
+    values$rho <- ""
+    values$confidence <- ""
+    values$alpha <- ""
+    values$power <- ""
+    values$percentage <- ""
+    values$calculation <- ""
+    values$predictors <- ""
+    values$criterion <- ""
+    values$old.output <-list('','','','','','','','','','')
 
     output$valueInput <- renderUI({
 
-		# Create input widgets for global calculation value, with default values from global
-      	html_ui <- ""
-      	if (values$calculation == "ci1") {
-        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          	  textInput("k", "Number of variables, including criterion:", values$k),
-                          	  textInput("r", "R squared:", values$r),
-                          	  textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95))
-        } else if (values$calculation == "ci2") {
-        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          	  textInput("k", "Number of variables, including criterion:", values$k),
-                          	  textInput("r", "R squared:", values$r),
-                          	  textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95))
-		} else if (values$calculation == "pa") {
-			html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                          	  textInput("k", "Number of variables, including criterion:", values$k),
-                              textInput("rho", "Rho squared:", values$rho),
-                              textInput("alpha", "Alpha:", values$alpha, placeholder = 0.05))
-		} else if (values$calculation == "ssc") {
-        	html_ui <- paste0(textInput("k", "Number of variables, including criterion:", values$k),
-                          	  textInput("rho", "Rho squared:", values$rho),
-                              textInput("alpha", "Alpha:", values$alpha, placeholder = 0.05),
-                              textInput("power", "Power desired:", values$power, placeholder = 0.8))
-      } else if (values$calculation == "ppc") {
-        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                              textInput("k", "Number of variables, including criterion:", values$k),
-                              textInput("rho", "Rho squared:", values$rho),
-                              textInput("percentage", "Percentage point desired:", values$percentage))
-      } else if (values$calculation == "pic") {
-        	html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+        html_ui <- ""
+
+        ## Create input widgets, pulling default values from global
+      	if (values$calculation == "fixedci") {
+            html_ui <- paste0(textInput("n", "Number of observations:", values$n),
                               textInput("k", "Number of variables, including criterion:", values$k),
                               textInput("r", "R squared:", values$r),
-                              textInput("rho", "Rho squared:", values$rho))
-      } else if (values$calculation == "b") {
-        
-			validate(need(input$datafile, ""))
+                              textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95))
+        } else if (values$calculation == "randomci") {
+            html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                              textInput("k", "Number of variables, including criterion:", values$k),
+                              textInput("r", "R squared:", values$r),
+                              textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95))
+        } else if (values$calculation == "power") {
+            html_ui <- paste0(textInput("n", "Number of observations:", values$n),
+                              textInput("k", "Number of variables, including criterion:", values$k),
+                              textInput("rho", "Rho squared:", values$rho),
+                              textInput("alpha", "Alpha:", values$alpha, placeholder = 0.05))
+        } else if (values$calculation == "samplesize") {
+            html_ui <- paste0(textInput("k", "Number of variables, including criterion:", values$k),
+                              textInput("rho", "Rho squared:", values$rho),
+                              textInput("alpha", "Alpha:", values$alpha, placeholder = 0.05),
+                              textInput("power", "Power desired:", values$power, placeholder = 0.8))
+        } else if (values$calculation == "beta") {
+            
+            validate(need(input$datafile, "")) ## Check that data file has been uploaded
 
-			# Check that R can read the data file as a .csv
-			result = tryCatch({
-				read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
-			}, warning = function(w) {
-				'problem'
-			}, error = function(e) {
-				'problem'
-			})
-			if ('problem' %in% result) {
-				return()
-			} else { # If so import it as a matrix
-				data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-			}
+            ## Check that R can read the data file as a .csv
+            tryCatch({
+                read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+            }, warning = function(w) {
+                stop("There was a problem reading your .csv file.")
+            }, error = function(e) {
+                stop("There was a problem reading your .csv file.")
+            })
 
-			variables <- ncol(data)
+            ## Load data and count the number of variables
+            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+            variables <- ncol(data)
 
-			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8", "9" = "9", "10" = "10", "11" = "11", "12" = "12", "13" = "13", "14" = "14", "15" = "15", "16" = "16")
-			html_ui <- ''
-			if (nrow(data) == ncol(data)) {
-				html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
-			}
+            if (variables > 16) {
+	      	stop("You cannot have more than 16 variables.")
+            }
+
+            options <- 1:variables
+            names(options) <- options
+            html_ui <- ''
+
+
+            ## If the data is a correlation matrix, create sample size input
+            if (nrow(data) == ncol(data)) {
+                html_ui <- paste0(html_ui, textInput("n", "Number of observations:", values$n))
+            }
+
+
+            ## Create confidence coefficient and method input
             html_ui <- paste0(html_ui,
-							  textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95),
-							  radioButtons("familywise", "Familywise error control:", choices = c("None"="uncorrected", "Bonferroni"="bonferroni", "Dunn-Sidak"="sidak", "Stepdown Bonferroni"="stepdown_bonferroni", "Stepdown Dunn-Sidak"="stepdown_sidak")),
-							  div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)),
-							  div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
+                              textInput("confidence",
+                                        "Confidence level:",
+                                        values$confidence,
+                                        placeholder = 0.95),
+                              radioButtons("familywise",
+                                           "Familywise error control:",
+                                           choices = c("None"="uncorrected",
+                                                       "Bonferroni"="bonferroni",
+                                                       "Dunn-Sidak"="sidak",
+                                                       "Stepdown Bonferroni"="stepdown_bonferroni",
+                                                       "Stepdown Dunn-Sidak"="stepdown_sidak")),
+                              div(style="display: inline-block;vertical-align:top; width: 100px;",
+                                  checkboxGroupInput("predictors", "Predictors:",
+                                                     choices=options)),
+                              div(style="display: inline-block;vertical-align:top; width: 50px;",
+                                  radioButtons("criterion", "Criterion:", choices=options))
+                              )
 
-      } else if (values$calculation == "r2") {
-        
-			validate(need(input$datafile, ""))
+        } else if (values$calculation == "r2") {
 
-			# Check that R can read the data file as a .csv
-			result = tryCatch({
-				read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
-			}, warning = function(w) {
-				'problem'
-			}, error = function(e) {
-				'problem'
-			})
-			if ('problem' %in% result) {
-				return()
-			} else { # If so import it as a matrix
-				data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-			}
+            validate(need(input$datafile, "")) ## Check that the data file has been uploaded
 
-			variables <- ncol(data)
+            ## Check that R can read the data file as a .csv
+            tryCatch({
+                read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+            }, warning = function(w) {
+                stop("There was a problem reading your .csv file.")
+            }, error = function(e) {
+                stop("There was a problem reading your .csv file.")
+            })
 
-			string_vector <- c("1" = "1", "2" = "2", "3" = "3", "4" = "4", "5" = "5", "6" = "6", "7" = "7", "8" = "8", "9" = "9", "10" = "10", "11" = "11", "12" = "12", "13" = "13", "14" = "14", "15" = "15", "16" = "16")
+            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+            variables <- ncol(data)
+            
+            if (variables > 16) {
+	      	stop("You cannot have more than 16 variables.")
+            }
 
+            options <- 1:variables
+            names(options) <- options
+            html_ui <- ""
 
-			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 100px;", checkboxGroupInput("predictors", "Predictors:", string_vector[1:variables], values$predictors)))
-			html_ui <- paste0(html_ui, div(style="display: inline-block;vertical-align:top; width: 50px;", radioButtons("criterion", "Criterion:", string_vector[1:variables], values$criterion)))
+            ## Create radio buttons for choosing the predictors
+            html_ui <- paste0(html_ui,
+                              div(style="display: inline-block;vertical-align:top; width: 100px;",
+                                  checkboxGroupInput("predictors",
+                                                     "Predictors:",
+                                                     options,
+                                                     values$predictors)))
 
-      }
-      HTML(html_ui)
+            ## Create radio buttons for choosing the criterion
+            html_ui <- paste0(html_ui,
+                              div(style="display: inline-block;vertical-align:top; width: 50px;",
+                                  radioButtons("criterion",
+                                               "Criterion:",
+                                               options,
+                                               values$criterion)))
+
+        }
+        HTML(html_ui)
     })
     
-	# If calculation is changed, send current widget values to global, then update global calculation value to whatever calculator it's changing to
+    ## If calculation is changed, send current widget values to global, then update global calculation value to whatever calculator it's changing to
     observeEvent(input$calculation, {
-      values$n <- input$n
-      values$k <- input$k
-      values$r <- input$r
-      values$confidence <- input$confidence
-      values$rho <- input$rho
-      values$alpha <- input$alpha
-      values$power <- input$power
-      values$percentage <- input$percentage
-      values$calculation <- input$calculation
-      values$predictors <- input$predictors
-      values$criterion <- input$criterion
+        values$n <- input$n
+        values$k <- input$k
+        values$r <- input$r
+        values$confidence <- input$confidence
+        values$rho <- input$rho
+        values$alpha <- input$alpha
+        values$power <- input$power
+        values$percentage <- input$percentage
+        values$calculation <- input$calculation
+        values$predictors <- input$predictors
+        values$criterion <- input$criterion
     })
 
-    output$r2Output <- eventReactive(input$runButton, {
-      
-      if (input$calculation == "ci1") {
-          validate(need(input$n, ""))
-          validate(need(input$k, ""))
-          validate(need(input$r, ""))
-          validate(need(input$confidence, ""))
-          ErrorCheck <- dget("ErrorCheck.R")
-          test <- ErrorCheck(input$calculation, input$n, input$k, input$r, input$confidence)
-          if (is.null(test)) {
-              return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
-          } else if (as.numeric(input$confidence) <= .6 || as.numeric(input$confidence) >= .999) {
-              return(capture.output(cat('<center><b><font color="red">Error: Confidence Level must be between .60 and .999, inclusive.</font></b></center>')))
-          } else {
-              ConfidenceInterval <- dget("ConfidenceInterval.R")
-              temp1 <- capture.output(ConfidenceInterval(input$n, input$k, input$r, input$confidence))
-          }
-
-      } else if (input$calculation == "ci2") {
-        validate(need(input$n, ""))
-        validate(need(input$k, ""))
-        validate(need(input$r, ""))
-        validate(need(input$confidence, ""))
-        ErrorCheck <- dget("ErrorCheck.R")
-        test <- ErrorCheck(input$calculation, input$n, input$k, input$r, input$confidence)
-        if (is.null(test)) {
-            return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
-        }else if (as.numeric(input$confidence) <= .6 || as.numeric(input$confidence) >= .999) {
-            return(capture.output(cat('<center><b><font color="red">Error: Confidence Level must be between .60 and .999, inclusive.</font></b></center>')))
-        } else {
-            ConfidenceInterval2 <- dget("ConfidenceInterval2.R")
-            temp1 <- capture.output(ConfidenceInterval2(input$n, input$k, input$r, input$confidence))
-        }
+    R2 <- eventReactive(input$runButton, {
         
-      } else if (input$calculation == "pa") {
-          validate(need(input$n, ""))
-          validate(need(input$k, ""))
-          validate(need(input$rho, ""))
-          validate(need(input$alpha, ""))
-          ErrorCheck <- dget("ErrorCheck.R")
-          test <- ErrorCheck(input$calculation, input$n, input$k, input$rho, input$alpha)
-          if (is.null(test)) {
-          	  return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
-          } else {
-              Power <- dget("Power.R")
-              temp1 <- capture.output(Power(input$n, input$k, input$rho, input$alpha))
-          }
+        if (input$calculation == "fixedci") {
 
-      } else if (input$calculation == "ssc") {
-          validate(need(input$k, ""))
-          validate(need(input$rho, ""))
-          validate(need(input$alpha, ""))
-          validate(need(input$power, ""))
-          ErrorCheck <- dget("ErrorCheck.R")
-          test <- ErrorCheck(input$calculation, input$k, input$rho, input$alpha, input$power)
-          if (is.null(test)) {
-          	  return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
-          } else {
-              SampleSize <- dget("SampleSize.R")
-              temp1 <- capture.output(SampleSize(input$k, input$rho, input$alpha, input$power))
-          }
-      } else if (input$calculation == "b") {
-		  validate(need(input$datafile, ""))
-		  validate(need(input$predictors, ""))
-		  validate(need(input$criterion, ""))
-		  validate(need(input$confidence, ""))
-		  validate(need(input$familywise, ""))
-		  
-		  # Check that R can read the data file as a .csv
-		  result = tryCatch({
-			read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
-		  }, warning = function(w) {
-			'problem'
-		  }, error = function(e) {
-			'problem'
-		  }, finally = {
-		  })
-		  if ('problem' %in% result) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: Invalid input.</font></b></center>')))
-		  } else { # If so import it as a matrix
-			data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-		  }
-		  
-		  if (ncol(data) > 16) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: You cannot have more than 16 variables.</font></b></center>')))
-		  }
+            ## Ensure that the necessary values have been entered
+            validate(need(input$n, ""))
+            validate(need(input$k, ""))
+            validate(need(input$r, ""))
+            validate(need(input$confidence, ""))
 
-		  if (as.character(input$criterion) %in% input$predictors) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: A variable cannot be both a predictor and the criterion.</font></b></center>')))
-		  }
-		  
-		  if (length(input$predictors) < 2) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: You must have at least two predictors.</font></b></center>')))
-		  }
+            ## Error checking
+            areIntegers(input$n, input$k)
+            areNumeric(input$r, input$confidence)
+            areCorrelations(input$r)
+            areValidCLs(input$confidence)
 
-		  if (NA %in% as.numeric(data)) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: Your data has missing or non-numeric elements.</font></b></center>')))
-		  }
+            ## Convert to numeric
+            n <- as.integer(input$n)
+            k <- as.integer(input$k)
+            r <- as.numeric(input$r)
+            confidence.level <- as.numeric(input$confidence)
 
-		  if (ncol(data) != nrow(data)) {
-		    Nobs <- nrow(data)
-		  	data <- cov(data)
-		  } else {
-			Nobs <- as.numeric(input$n)
-		  }
-		  
-		  predictors <- as.numeric(input$predictors)
-		  criterion <- as.numeric(input$criterion)
+            ## Run the tests
+            fixedCI <- dget("fixedCI.R")
+            foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", &alpha;=", 1-confidence.level)
+            new.output <- fixedCI(n, k, r, confidence.level)
+            new.output <- htmlTable(new.output,
+                                    caption = "Confidence Interval (Fixed Regressor)",
+                                    css.cell = "padding-left: 2em; padding-right: 2em;",
+                                    tfoot = foot)
 
-		  familywise <- input$familywise
+        } else if (input$calculation == "randomci") {
 
-		  cov.x <- data[predictors,predictors]
-		  cov.xy <- data[predictors,criterion]
-		  var.y <- data[criterion,criterion]
+            ## Ensure that the necessary values have been entered
+            validate(need(input$n, ""))
+            validate(need(input$k, ""))
+            validate(need(input$r, ""))
+            validate(need(input$confidence, ""))
 
-		  alpha <- 1 - as.numeric(input$confidence)
+            ## Error checking
+            areIntegers(input$n, input$k)
+            areNumeric(input$r, input$confidence)
+            areCorrelations(input$r)
+            areValidCLs(input$confidence)
 
-		  stdb <- dget("stdb.R")
-		  temp1 <- capture.output(stdb(X=NULL, y=NULL, cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, criterion=criterion, predictors=predictors, alpha=alpha, Nobs=Nobs, familywise=familywise))
+            ## Convert to numeric
+            n <- as.integer(input$n)
+            k <- as.integer(input$k)
+            r <- as.numeric(input$r)
+            confidence.level <- as.numeric(input$confidence)
+    
+            ## Run the test
+            randomCI <- dget("randomCI.R")
+            new.output <- randomCI(n, k, r, confidence.level)
+            foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", &alpha;=", 1-confidence.level)
+            new.output <- randomCI(n, k, r, confidence.level)
+            new.output <- htmlTable(new.output,
+                                    caption = "Confidence Interval (Random Regressor)",
+                                    css.cell = "padding-left: 2em; padding-right: 2em;",
+                                    tfoot = foot)
+            
+        } else if (input$calculation == "power") {
 
+            ## Ensure that the necessary values have been entered
+            validate(need(input$n, ""))
+            validate(need(input$k, ""))
+            validate(need(input$rho, ""))
+            validate(need(input$alpha, ""))
 
-      } else if (input$calculation == "r2") {
-		  validate(need(input$datafile, ""))
-		  validate(need(input$predictors, ""))
-		  validate(need(input$criterion, ""))
+            ## Error checking
+            areIntegers(input$n, input$k)
+            areNumeric(input$rho, input$alpha)
+            areCorrelations(input$rho)
+            areProbabilities(input$alpha)
 
-		  # Check that R can read the data file as a .csv
-		  result = tryCatch({
-			read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
-		  }, warning = function(w) {
-			'problem'
-		  }, error = function(e) {
-			'problem'
-		  }, finally = {
-		  })
-		  if ('problem' %in% result) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: You must have at least two predictors.</font></b></center>')))
-		  } else { # If so import it as a matrix
-			data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-		  }
-		  
-		  if (ncol(data) > 16) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: You cannot have more than 16 variables.</font></b></center>')))
-		  }
+            ## Convert to numeric
+            n <- as.integer(input$n)
+            k <- as.integer(input$k)
+            rho <- as.numeric(input$rho)
+            alpha <- as.numeric(input$alpha)
 
-		  if (NA %in% as.numeric(data)) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: Your data has missing or non-numeric elements.</font></b></center>')))
-		  }
-		  
-		  if (as.character(input$criterion) %in% input$predictors) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: A variable cannot be both a predictor and the criterion.</font></b></center>')))
-		  }
-		  
-		  if (length(input$predictors) < 2) {
-	      	return(capture.output(cat('<center><b><font color="red">Error: You must have at least two predictors.</font></b></center>')))
-		  }
-		  
-		  rxx <- dget("rxx.R")
+            Power <- dget("Power.R")
+            new.output <- Power(n, k, rho, alpha)
+            foot <- paste0("N=", n, ", k=", k, ", &rho;=", rho, ", &alpha;=", alpha)
+            new.output <- htmlTable(new.output,
+                                    caption = "Power Calculation",
+                                    tfoot = foot)
 
-		  predictors <- as.numeric(input$predictors)
-		  criterion <- as.numeric(input$criterion)
+        } else if (input$calculation == "samplesize") {
 
-		  temp1 <- capture.output(rxx(data, predictors, criterion))
+            ## Ensure that the necessary values have been entered
+            validate(need(input$k, ""))
+            validate(need(input$rho, ""))
+            validate(need(input$alpha, ""))
+            validate(need(input$power, ""))
 
-      }
+            ## Error checking
+            areIntegers(input$n)
+            areNumeric(input$rho, input$alpha, input$power)
+            areCorrelations(input$rho)
+            areProbabilities(input$alpha, input$power)
+
+            ## Convert to numeric
+            k <- as.integer(input$k)
+            rho <- as.numeric(input$rho)
+            alpha <- as.numeric(input$alpha)
+            power <- as.numeric(input$power)
+
+            SampleSize <- dget("SampleSize.R")
+            new.output <- SampleSize(k, rho, alpha, power)
+            foot <- paste0("k=", k, ", &rho;=", rho, ", &alpha;=", alpha, ", 1-&beta;=", power)
+            new.output <- htmlTable(new.output,
+                                    caption = "Sample Size Calculation",
+                                    css.cell = "padding-left: .5em; padding-right: .2em;",
+                                    tfoot = foot)
 
 
+        } else if (input$calculation == "beta") {
 
+            ## Ensure that the necessary values have been entered
+            validate(need(input$datafile, ""))
+            validate(need(input$predictors, ""))
+            validate(need(input$criterion, ""))
+            validate(need(input$confidence, ""))
+            validate(need(input$familywise, ""))
+            
+            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+            
+            ## Error checking
+            if (as.character(input$criterion) %in% input$predictors) {
+	      	stop("A variable cannot be both a predictor and the criterion.")
+            }
+            if (length(input$predictors) < 2) {
+	      	stop("You must have at least two predictors.")
+            }
+            if (NA %in% as.numeric(data)) {
+	      	stop("Your data has missing or non-numeric elements.")
+            }
 
-	  # only show last 20 output
-      if (temp1 != values$output[[length(values$output)]]) {
-        values$output[[length(values$output)+1]] <- temp1
-        if (length(values$output) > 19) {
-          first <- length(values$output)-19
-        } else {
-          first <- 1
+            ## Define arguments
+            if (ncol(data) != nrow(data)) {
+                Nobs <- nrow(data)
+                data <- cov(data)
+            } else {
+                areIntegers(input$n)
+                Nobs <- as.numeric(input$n)
+            }
+            predictors <- as.numeric(input$predictors)
+            criterion <- as.numeric(input$criterion)
+            familywise <- input$familywise
+            cov.x <- data[predictors,predictors]
+            cov.xy <- data[predictors,criterion]
+            var.y <- data[criterion,criterion]
+            alpha <- 1 - as.numeric(input$confidence)
+
+            Beta <- dget("Beta.R")
+            new.output <- Beta(cov.x=cov.x, cov.xy=cov.xy, var.y=var.y, criterion=criterion, predictors=predictors, alpha=alpha, Nobs=Nobs, familywise=familywise)
+            foot <-paste0("Y=",criterion,", X=",paste(predictors, collapse=","))
+            new.output <- htmlTable(new.output,
+                                    css.cell = "padding-left: .5em; padding-right: .5em;",
+                                    caption = "Standardized Beta Coefficient Estimates",
+                                    cgroup = c("Estimates", ""),
+                                    n.cgroup = c(3,4),
+                                    tfoot = foot)
+
+        } else if (input$calculation == "r2") {
+
+            ## Ensure that the necessary values have been entered
+            validate(need(input$datafile, ""))
+            validate(need(input$predictors, ""))
+            validate(need(input$criterion, ""))
+
+            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
+
+            ## Error checking
+            if (as.character(input$criterion) %in% input$predictors) {
+	      	stop("A variable cannot be both a predictor and the criterion.")
+            }
+            if (length(input$predictors) < 2) {
+	      	stop("You must have at least two predictors.")
+            }
+            if (NA %in% as.numeric(data)) {
+	      	stop("Your data has missing or non-numeric elements.")
+            }
+            
+            ## Define arguments
+            predictors <- as.numeric(input$predictors)
+            criterion <- as.numeric(input$criterion)
+
+            ## Run the test
+            R2 <- dget("R2.R")
+            new.output <- R2(data, predictors, criterion)
+            new.output <- htmlTable(new.output,
+                                    caption = "R<sup>2</sup> Calculation",
+                                    tfoot = paste0("Y=", criterion, ", X=", paste(predictors, collapse=",")))
+
         }
-        last <- length(values$output)
-        capture.output(cat(paste(unlist(rev(values$output[first:last])), collapse='<br>')))
-      } else {        
-        if (length(values$output) > 19) {
-          first <- length(values$output)-19
-        } else {
-          first <- 1
-        }
-        last <- length(values$output)
-        capture.output(cat(paste(unlist(rev(values$output[first:last])), collapse='<br>')))
-      }
 
-  })
+        ## Print the current output plus the last 9
+        values$old.output <- c(new.output, values$old.output)[1:10]
+        html_output <- paste(values$old.output, collapse="")
+        HTML(html_output)
+
+    })
+
+    output$finaloutput <- renderUI({ 
+        R2()
+    })
 
 })

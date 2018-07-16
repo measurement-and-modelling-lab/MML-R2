@@ -127,15 +127,11 @@ function (n, k, Rsq, conlev) {
 	
 	
         #Create a formatted output
-	
-        output_table <- matrix(c('Lower Limit', 'Upper Limit', 'Lower Bound', format(lower, scientific=F), format(upper, scientific=F), format(lbound, scientific=F)), nrow=3, ncol=2)
+        output.table <- matrix(c(format(lower, scientific=F), format(upper, scientific=F), format(lbound, scientific=F)), nrow=1, ncol=3)
+        colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound')
+        return(output.table)
 
-
-	cat('<center><b>', 100*conlev, '% Confidence Interval (Random) Results</b>', sep="")
-
-        tablegen <- dget("tablegen.r")
-        tablegen(output_table,FALSE)
-
-        cat('<i>N=',n,', k=',k, ', R<sup>2</sup>=',Rsq,', CL=',conlev,'</center></i>', sep="")
+	#cat('<center><b>', 100*conlev, '% Confidence Interval (Random) Results</b>', sep="")
+        #cat('<i>N=',n,', k=',k, ', R<sup>2</sup>=',Rsq,', CL=',conlev,'</center></i>', sep="")
 
 }
