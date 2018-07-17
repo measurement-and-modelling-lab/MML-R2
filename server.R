@@ -83,9 +83,29 @@ shinyServer(function(input, output, session) {
     values$criterion <- ""
     values$old.output <-c("","","","","","","","","","")
 
+
+
+    output$selector <- renderUI({ ## This is necessary to get subscripts and superscripts
+
+        ## You can't use HTML() in the choices argument, only in the two punch combo choiceNames/choiceValues
+        ## The drop-down menu input, selectInput, doesn't have those, so we're using radioButtons instead
+        html_ui <- paste0(radioButtons("calculation", "Calculation to run:",
+                                       choiceNames = list(HTML("Confidence interval on R<sup>2</sup> (fixed regressor)"),
+                                                          HTML("Confidence interval on R<sup>2</sup> (random regressor)"),
+                                                          HTML("Power to reject H<sub>0</sub>: R<sup>2</sup> = 0"),
+                                                          HTML("Sample size to reject H<sub>0</sub>: R<sup>2</sup> = 0"),
+                                                          "Estimate standardized regression coefficients",
+                                                          HTML("Calculate R<sup>2</sup> from raw data")),
+                                       choiceValues = list("fixedci", "randomci", "power", "samplesize", "beta", "r2")))
+        HTML(html_ui)
+
+    })
+
     output$valueInput <- renderUI({
 
         html_ui <- ""
+
+        validate(need(input$calculation, ""))
 
         ## Create input widgets, pulling default values from global
       	if (values$calculation == "fixedci") {
@@ -240,7 +260,7 @@ shinyServer(function(input, output, session) {
 
             ## Run the tests
             fixedCI <- dget("fixedCI.R")
-            foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", &alpha;=", 1-confidence.level)
+            foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", 1-&alpha;=", confidence.level)
             new.output <- fixedCI(n, k, r, confidence.level)
             new.output <- htmlTable(new.output,
                                     caption = "Confidence Interval (Fixed Regressor)",
@@ -267,7 +287,7 @@ shinyServer(function(input, output, session) {
             ## Run the test
             randomCI <- dget("randomCI.R")
             new.output <- randomCI(n, k, r, confidence.level)
-            foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", &alpha;=", 1-confidence.level)
+            foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", 1-&alpha;=", confidence.level)
             new.output <- randomCI(n, k, r, confidence.level)
             new.output <- htmlTable(new.output,
                                     caption = "Confidence Interval (Random Regressor)",
@@ -398,6 +418,8 @@ shinyServer(function(input, output, session) {
                                     tfoot = paste0("Y=", criterion, ", X=", paste(predictors, collapse=",")))
 
         }
+
+        print(new.output)
 
         ## Print the current output plus the last 9
         ## But only if the new output is different from the previous one

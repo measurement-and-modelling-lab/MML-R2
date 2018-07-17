@@ -27,16 +27,11 @@ shinyUI(fluidPage(theme = "simplex.css",
 
   sidebarLayout(
       sidebarPanel(
-          selectInput("calculation", "Calculation to run:",
-                      c("Confidence interval on R2 (fixed regressor)" = "fixedci",
-                        "Confidence interval on R2 (random regressor)" = "randomci",
-                        "Power to reject H0: R2 = 0" = "power",
-                        "Sample size to reject HO: R2 = 0" = "samplesize",
-                        "Estimate standardized regression coefficients" = "beta",
-                        "Calculate R2 from raw data" = "r2")),
+          uiOutput("selector"), ## Radio buttons for choosing a calculation to run
           HTML("<hr>"),
-          conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'beta'", fileInput("datafile", "Data:")),
-          uiOutput("valueInput"),
+          conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'beta'",
+                           fileInput("datafile", "Data:")),
+          uiOutput("valueInput"), ## Inputs for the selected calculation
           HTML("<hr>"),
           actionButton("runButton", "Run"),
           HTML("<br><br>"),
