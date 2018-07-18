@@ -4,7 +4,7 @@ require(htmlTable) || install.packages(htmlTable)
 
 shinyServer(function(input, output, session) {
 
-    ## Validate(Need()) 
+    ## Simultaneously require that several input$ variables exist before moving on
     massValidateNeed <- function(...) {
         arguments <- list(...)
         for (a in arguments) {
@@ -33,19 +33,6 @@ shinyServer(function(input, output, session) {
         }
     }
 
-
-    ## Determine whether several numbers are valid correlations
-    areSquaredMCs <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            a <- as.numeric(a)
-            if (a < 0 || a > 1) {
-                stop("Invalid input.")
-            }
-        }
-    }
-
-
     ## Determine whether a confidence level is valid
     areValidCLs <- function(...) {
         arguments <- list(...)
@@ -57,8 +44,8 @@ shinyServer(function(input, output, session) {
         }
     }
 
-
-    areProbabilities <- function(...) {
+    ## Determine whether a number is betwee 0 and 1 exclusive
+    areBetween0And1 <- function(...) {
         arguments <- list(...)
         for (a in arguments) {
             a <- as.numeric(a)
@@ -249,7 +236,7 @@ shinyServer(function(input, output, session) {
             ## Error checking
             areIntegers(input$n, input$k)
             areNumeric(input$r, input$confidence)
-            areSquaredMCs(input$r)
+            areBetween0And1(input$r)
             areValidCLs(input$confidence)
 
             ## Convert to numeric
@@ -275,7 +262,7 @@ shinyServer(function(input, output, session) {
             ## Error checking
             areIntegers(input$n, input$k)
             areNumeric(input$r, input$confidence)
-            areSquaredMCs(input$r)
+            areBetween0And1(input$r)
             areValidCLs(input$confidence)
 
             ## Convert to numeric
@@ -302,8 +289,7 @@ shinyServer(function(input, output, session) {
             ## Error checking
             areIntegers(input$n, input$k)
             areNumeric(input$rho, input$alpha)
-            areSquaredMCs(input$rho)
-            areProbabilities(input$alpha)
+            areBetween0And1(input$rho, input$alpha)
 
             ## Convert to numeric
             n <- as.integer(input$n)
@@ -317,11 +303,6 @@ shinyServer(function(input, output, session) {
 
             new.output <- paste0("<p><b>Power Calculation</b><br>", "Power = ", new.output[1,1], "<br>", foot, "<p>")
             
-            ## For a very sparse table
-            ## new.output <- htmlTable(new.output,
-            ##                         caption = "<b>Power Calculation</b>",
-            ##                         tfoot = foot)
-
         } else if (input$calculation == "samplesize") {
 
             ## Ensure that the necessary values have been entered
@@ -330,8 +311,7 @@ shinyServer(function(input, output, session) {
             ## Error checking
             areIntegers(input$n)
             areNumeric(input$rho, input$alpha, input$power)
-            areSquaredMCs(input$rho)
-            areProbabilities(input$alpha, input$power)
+            areBetween0And1(input$rho, input$alpha, input$power)
 
             ## Convert to numeric
             k <- as.integer(input$k)
@@ -428,11 +408,6 @@ shinyServer(function(input, output, session) {
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
             new.output <- paste0("<p><b>Squared Multiple Correlation Calculation</b><br>", "R<sup>2</sup> = ", new.output[1,1], "<br>", foot, "<p>")
             
-            ## For a very spare table
-            ## new.output <- htmlTable(new.output,
-            ##                         caption = "<b>Squared Multiple Correlation Calculation</b>",
-            ##                         tfoot = foot)
-
         }
 
         ## Print the current output plus the last 9

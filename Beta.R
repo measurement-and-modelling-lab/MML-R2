@@ -141,11 +141,14 @@ function(cx, cxy, vy, N, alpha, familywise) {
     }
 
     if (familywise %in% c('stepdown_bonferroni', 'stepdown_sidak')) {
-        ## extract the alphas that are greater than their respective p values
-        ## make them equal to the least among them
+        ## Extract the alphas that are greater than their respective p values
+        ## If there are any, then there make them equal to the least among them
 	comparison.matrix <- cbind(p.values, alpha)
-	comparison.matrix[comparison.matrix[,1] > comparison.matrix[,2], 2] <- min(comparison.matrix[comparison.matrix[,1] > comparison.matrix[,2], 2])
-	alpha <- comparison.matrix[,2]
+        if (length(comparison.matrix[comparison.matrix[,1] > comparison.matrix[,2], 2]) > 0) {
+            comparison.matrix[comparison.matrix[,1] > comparison.matrix[,2], 2] <- min(comparison.matrix[comparison.matrix[,1] > comparison.matrix[,2], 2])
+            alpha <- comparison.matrix[,2]
+        }
+
     }
 
     tc <- qt(alpha/2, N-p-1, lower = F)
