@@ -263,7 +263,7 @@ shinyServer(function(input, output, session) {
             foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", 1-&alpha;=", confidence.level)
             new.output <- fixedCI(n, k, r, confidence.level)
             new.output <- htmlTable(new.output,
-                                    caption = "Confidence Interval (Fixed Regressor)",
+                                    caption = "<b>Confidence Interval (Fixed Regressor)</b>",
                                     css.cell = "padding-left: 2em; padding-right: 2em;",
                                     tfoot = foot)
 
@@ -290,7 +290,7 @@ shinyServer(function(input, output, session) {
             foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", 1-&alpha;=", confidence.level)
             new.output <- randomCI(n, k, r, confidence.level)
             new.output <- htmlTable(new.output,
-                                    caption = "Confidence Interval (Random Regressor)",
+                                    caption = "<b>Confidence Interval (Random Regressor)</b>",
                                     css.cell = "padding-left: 2em; padding-right: 2em;",
                                     tfoot = foot)
             
@@ -314,9 +314,13 @@ shinyServer(function(input, output, session) {
             Power <- dget("Power.R")
             new.output <- Power(n, k, rho, alpha)
             foot <- paste0("N=", n, ", k=", k, ", &rho;=", rho, ", &alpha;=", alpha)
-            new.output <- htmlTable(new.output,
-                                    caption = "Power Calculation",
-                                    tfoot = foot)
+
+            new.output <- paste0("<p><b>Power Calculation</b><br>", "Power = ", new.output[1,1], "<br>", foot, "<p>")
+            
+            ## For a very sparse table
+            ## new.output <- htmlTable(new.output,
+            ##                         caption = "<b>Power Calculation</b>",
+            ##                         tfoot = foot)
 
         } else if (input$calculation == "samplesize") {
 
@@ -339,7 +343,7 @@ shinyServer(function(input, output, session) {
             new.output <- SampleSize(k, rho, alpha, power)
             foot <- paste0("k=", k, ", &rho;=", rho, ", &alpha;=", alpha, ", 1-&beta;=", power)
             new.output <- htmlTable(new.output,
-                                    caption = "Sample Size Calculation",
+                                    caption = "<b>Sample Size Calculation</b>",
                                     css.cell = "padding-left: .5em; padding-right: .2em;",
                                     tfoot = foot)
 
@@ -380,10 +384,17 @@ shinyServer(function(input, output, session) {
 
             Beta <- dget("Beta.R")
             new.output <- Beta(cx, cxy, vy, N, alpha, familywise)
-            foot <-paste0("Y=",criterion,", X=",paste(predictors, collapse=","))
+
+            familywise.labels <- list("uncorrected"="Uncontrolled",
+                                    "bonferroni"="Bonferroni",
+                                    "sidak"="Dunn-Sidak",
+                                    "stepdown_bonferroni"="Stepdown Bonferroni",
+                                    "stepdown_sidak"="Stepdown Dunn-Sidak")
+
+            foot <-paste0("Y=",criterion,", X=",paste(predictors, collapse=","), ", 1-&alpha;=", 1-alpha, ", FW=", familywise.labels[[familywise]])
             new.output <- htmlTable(new.output,
                                     css.cell = "padding-left: .5em; padding-right: .5em;",
-                                    caption = "Standardized Beta Coefficient Estimates",
+                                    caption = "<b>Standardized Beta Coefficient Estimates</b>",
                                     cgroup = c("Estimates", ""),
                                     n.cgroup = c(3,4),
                                     tfoot = foot)
@@ -413,13 +424,16 @@ shinyServer(function(input, output, session) {
             ## Run the test
             R2 <- dget("R2.R")
             new.output <- R2(data, predictors, criterion)
-            new.output <- htmlTable(new.output,
-                                    caption = "Squared Multiple Correlation Calculation",
-                                    tfoot = paste0("Y=", criterion, ", X=", paste(predictors, collapse=",")))
+
+            foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
+            new.output <- paste0("<p><b>Squared Multiple Correlation Calculation</b><br>", "R<sup>2</sup> = ", new.output[1,1], "<br>", foot, "<p>")
+            
+            ## For a very spare table
+            ## new.output <- htmlTable(new.output,
+            ##                         caption = "<b>Squared Multiple Correlation Calculation</b>",
+            ##                         tfoot = foot)
 
         }
-
-        print(new.output)
 
         ## Print the current output plus the last 9
         ## But only if the new output is different from the previous one

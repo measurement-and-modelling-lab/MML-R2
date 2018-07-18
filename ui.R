@@ -19,7 +19,13 @@ shinyUI(fluidPage(theme = "simplex.css",
 
     ## CSS style stuff
     tags$head(
-        tags$style(HTML("@import url('//fonts.googleapis.com/css?family=Patua+One');"))
+        tags$style(HTML("@import url('//fonts.googleapis.com/css?family=Patua+One');
+        
+th {
+   color: #808080;
+}
+
+                        "))
     ),
     
   ## No title since it's in the header bar

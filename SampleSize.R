@@ -58,7 +58,7 @@ function (k, rho, alpha, power) {
     rowname1 <- paste0("N = ", Nlow)
     rowname2 <- paste0("N = ", Nhigh)
     colnames(output.table) <- c(rowname1, rowname2)
-    rownames(output.table) <- "<font color=\"#494949\"><b>Power</b></font>"
+    rownames(output.table) <- "<b>Power</b>"
     return(output.table)
 
 }
