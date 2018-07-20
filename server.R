@@ -2,7 +2,15 @@ require(shiny) || install.packages(shiny)
 require(shinythemes) || install.packages(shinythemes)
 require(htmlTable) || install.packages(htmlTable)
 
+
+
 shinyServer(function(input, output, session) {
+
+    observe({
+        options(shiny.sanitize.errors = FALSE)
+    })
+   
+
 
     ## Simultaneously require that several input$ variables exist before moving on
     massValidateNeed <- function(...) {

@@ -32,8 +32,6 @@ th {
   ## No title since it's in the header bar
   headerPanel('', windowTitle = 'MML-R2'),
 
-  options(shiny.sanitize.errors = FALSE),
-
   sidebarLayout(
       sidebarPanel(
           uiOutput("selector"), ## Radio buttons for choosing a calculation to run
