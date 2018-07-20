@@ -131,9 +131,9 @@ shinyServer(function(input, output, session) {
             tryCatch({
                 read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
             }, warning = function(w) {
-                stop("There was a problem reading your .csv file.")
+                stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
             }, error = function(e) {
-                stop("There was a problem reading your .csv file.")
+                stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
             })
 
             ## Load data and count the number of variables
@@ -307,9 +307,15 @@ shinyServer(function(input, output, session) {
 
             Power <- dget("Power.R")
             new.output <- Power(n, k, rho, alpha)
+            new.output <- round(new.output, 5)
+            if (new.output[1,1] == 1) {
+                new.output[1,1] <- '> 0.99999'
+            } else {
+                new.output[1,1] <- paste0("= ", new.output[1,1])
+            }
             foot <- paste0("N=", n, ", k=", k, ", &rho;=", rho, ", &alpha;=", alpha)
 
-            new.output <- paste0("<p><b>Power</b><br>", "Power = ", new.output[1,1], "<br>", foot, "<p>")
+            new.output <- paste0("<p><b>Power</b><br>", "Power ", new.output[1,1], "<br>", foot, "<p>")
             
         } else if (input$calculation == "samplesize") {
 

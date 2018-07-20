@@ -22,13 +22,13 @@ function (k, rho, alpha, power) {
         }, error = function(e) {
             stop("Sample size calculation failed.")
         })
-        
+
         fcrit <- qf(1-alpha, df1, df2)
         powerest <- 1-pf(fcrit, df1, df1, ncp=nc) ## Power Estimate
 
         ## Modified bisection
         if (powerest > power) {
-            increment <- increment/2  
+            increment <- increment/2
             N <- N-increment
         }
 
@@ -45,14 +45,14 @@ function (k, rho, alpha, power) {
 
     Nlow <- floor(N)
     Nhigh <- ceiling(N)
-    
-    
+
+
     ## Calculate power using the lower N and the higher N
     Power <- dget("Power.R")
     powerlow <- Power(Nlow,k,rho,alpha)[1,1]
     powerhigh <- Power(Nhigh,k,rho,alpha)[1,1]
 
-    
+
     ## Format output table
     output.table <- matrix(c(powerlow, powerhigh), nrow=1, ncol=2)
     rowname1 <- paste0("N = ", Nlow)
