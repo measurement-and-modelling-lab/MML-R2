@@ -9,9 +9,10 @@ shinyUI(fluidPage(theme = "simplex.css",
           <div class="bar">
               <b class="title">Measurement and Modelling Lab &nbsp; - &nbsp; Tools</b><br class="rwd-break">
               <b class="link">
-                  <a href="https://shiny.rcg.sfu.ca/u/pserafin/rsquared/"><font color="#00ca8a">MML-R2</font></a>
-                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/wbcorr/"><font color="white">MML-WBCORR</font></a>
-                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/csvgenerator/"><font color="white">CSV Generator</font></a>
+                  <a href="https://shiny.rcg.sfu.ca/u/pserafin/MML-R2/"><font color="#00ca8a">MML-R2</font></a>
+                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/MML-Multicorr/"><font color="white">MML-Multicorr</font></a>
+                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/MML-WBCORR/"><font color="white">MML-WBCORR</font></a>
+                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/csv-generator/"><font color="white">CSV Generator</font></a>
               </b>
           </div>
           <br>'
@@ -30,6 +31,8 @@ th {
     
   ## No title since it's in the header bar
   headerPanel('', windowTitle = 'MML-R2'),
+
+  options(shiny.sanitize.errors = FALSE),
 
   sidebarLayout(
       sidebarPanel(

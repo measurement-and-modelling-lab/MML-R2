@@ -79,9 +79,9 @@ shinyServer(function(input, output, session) {
         html_ui <- paste0(radioButtons("calculation", "Calculation to run:",
                                        choiceNames = list(HTML("Confidence interval on R<sup>2</sup> (fixed regressor)"),
                                                           HTML("Confidence interval on R<sup>2</sup> (random regressor)"),
-                                                          HTML("Power to reject H<sub>0</sub>: R<sup>2</sup> = 0"),
-                                                          HTML("Sample size to reject H<sub>0</sub>: R<sup>2</sup> = 0"),
-                                                          "Estimate standardized regression coefficients",
+                                                          HTML("Power to reject R<sup>2</sup> = 0"),
+                                                          HTML("Sample size to reject R<sup>2</sup> = 0"),
+                                                          "Standardized regression coefficients",
                                                           HTML("Calculate R<sup>2</sup> from raw data")),
                                        choiceValues = list("fixedci", "randomci", "power", "samplesize", "beta", "r2")))
         HTML(html_ui)
@@ -301,7 +301,7 @@ shinyServer(function(input, output, session) {
             new.output <- Power(n, k, rho, alpha)
             foot <- paste0("N=", n, ", k=", k, ", &rho;=", rho, ", &alpha;=", alpha)
 
-            new.output <- paste0("<p><b>Power Calculation</b><br>", "Power = ", new.output[1,1], "<br>", foot, "<p>")
+            new.output <- paste0("<p><b>Power</b><br>", "Power = ", new.output[1,1], "<br>", foot, "<p>")
             
         } else if (input$calculation == "samplesize") {
 
@@ -323,7 +323,7 @@ shinyServer(function(input, output, session) {
             new.output <- SampleSize(k, rho, alpha, power)
             foot <- paste0("k=", k, ", &rho;=", rho, ", &alpha;=", alpha, ", 1-&beta;=", power)
             new.output <- htmlTable(new.output,
-                                    caption = "<b>Sample Size Calculation</b>",
+                                    caption = "<b>Sample Size</b>",
                                     css.cell = "padding-left: .5em; padding-right: .2em;",
                                     tfoot = foot)
 
@@ -366,15 +366,15 @@ shinyServer(function(input, output, session) {
             new.output <- Beta(cx, cxy, vy, N, alpha, familywise)
 
             familywise.labels <- list("uncorrected"="Uncontrolled",
-                                    "bonferroni"="Bonferroni",
-                                    "sidak"="Dunn-Sidak",
-                                    "stepdown_bonferroni"="Stepdown Bonferroni",
-                                    "stepdown_sidak"="Stepdown Dunn-Sidak")
+                                      "bonferroni"="Bonferroni",
+                                      "sidak"="Dunn-Sidak",
+                                      "stepdown_bonferroni"="Stepdown Bonferroni",
+                                      "stepdown_sidak"="Stepdown Dunn-Sidak")
 
             foot <-paste0("Y=",criterion,", X=",paste(predictors, collapse=","), ", 1-&alpha;=", 1-alpha, ", FW=", familywise.labels[[familywise]])
             new.output <- htmlTable(new.output,
                                     css.cell = "padding-left: .5em; padding-right: .5em;",
-                                    caption = "<b>Standardized Beta Coefficient Estimates</b>",
+                                    caption = "<b>Standardized Beta Coefficients</b>",
                                     cgroup = c("Estimates", ""),
                                     n.cgroup = c(3,4),
                                     tfoot = foot)
@@ -390,9 +390,6 @@ shinyServer(function(input, output, session) {
             if (as.character(input$criterion) %in% input$predictors) {
 	      	stop("A variable cannot be both a predictor and the criterion.")
             }
-            if (length(input$predictors) < 2) {
-	      	stop("You must have at least two predictors.")
-            }
             if (NA %in% as.numeric(data)) {
 	      	stop("Your data has missing or non-numeric elements.")
             }
@@ -406,7 +403,7 @@ shinyServer(function(input, output, session) {
             new.output <- R2(data, predictors, criterion)
 
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
-            new.output <- paste0("<p><b>Squared Multiple Correlation Calculation</b><br>", "R<sup>2</sup> = ", new.output[1,1], "<br>", foot, "<p>")
+            new.output <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> = ", new.output[1,1], "<br>", foot, "<p>")
             
         }
 

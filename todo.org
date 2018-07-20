@@ -1,3 +1,4 @@
  - Fix erroneous input errors
  - Put custom functions in their own file or files
  - Add more comments to the calculation functions
+ - In power output, make ">" and "=" part of the number, not the label
