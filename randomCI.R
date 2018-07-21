@@ -85,29 +85,18 @@ function (n, k, Rsq, conlev) {
     }
 
     output1 <- Bisection(n, k, Rsq, conlev)
+    upper <- output1[2]
+    lower <- output1[1]
+    lbound <- Bisection(n, k, Rsq,  conlev-(1-conlev))[1]
 
-    upper <- round(output1[[2]], 5)
-    if (nchar(upper) < 7) {
-        upper <- paste0(upper,0)
-    }
 
-    lower <- round(output1[[1]], 5)
-    if (lower == 0) {
-        lower <- '< 0.00001'
-    } else if (nchar(lower) < 7) {
-        lower <- paste0(lower,0)
-    }
-
-    lbound <- round(Bisection(n, k, Rsq,  conlev-(1-conlev))[[1]], 5)
-    if (lbound == 0) {
-        lbound <- '< 0.00001'
-    } else if (nchar(lbound) < 7) {
-        lbound <- paste0(lbound,0)
-    }
-    
     ## Format input matrix
-    output.table <- matrix(c(format(lower, scientific=F), format(upper, scientific=F), format(lbound, scientific=F)), nrow=1, ncol=3)
+    output.table <- matrix(c(lower, upper, lbound), nrow=1, ncol=3)
+    output.table <- round(output.table, 5)
+    output.table[output.table == 1] <- "> 0.99999"
+    output.table[output.table == 0] <- "< 0.00001"
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound')
+
     return(output.table)
 
 }

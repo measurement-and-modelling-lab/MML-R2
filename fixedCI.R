@@ -30,7 +30,6 @@ function (N, k, RS, clevel) {
             break
         }
     }
-    RSLL <- round(ncLL/(ncLL+N), 5)
 
 
     ## Upper limit
@@ -44,7 +43,7 @@ function (N, k, RS, clevel) {
 	    stop("Confidence interval calculation failed.")
         }
     }
-    RSUL <- round(ncUL/(ncUL+N), 5)
+
 
     ## Lower bound
     clevel2 <- clevel - (1-clevel)
@@ -61,35 +60,16 @@ function (N, k, RS, clevel) {
             break
         }
     }
-    RSLB <- round(ncLB/(ncLB+N), 5)
 
     plevel <- 1 - pf(Fobs, df1, N-df1-1, ncp=0)
-    if (plevel < .00001) {
-        plevel <- '< 0.00001'
-    } else {
-        plevel <- round(plevel, 5)
-        if (nchar(plevel) < 7) {
-            plevel <- paste0(plevel,0)
-        }
-    }
     
-    if (nchar(RSUL) < 7) {
-        RSUL <- paste0(RSUL,0)
-    }
+    output.table <- matrix(c(RSLL, RSUL, RSLB, plevel), nrow=1, ncol=4)
 
-    if (RSLL == 0) {
-        RSLL <- '< 0.00001'
-    } else if (nchar(RSLL) < 7) {
-        RSLL <- paste0(RSLL,0)
-    }
+    ## Round output
+    output.table <- round(output.table, 5)
+    output.table[output.table == 1] <- "> 0.99999"
+    output.table[output.table == 0] <- "< 0.00001"
 
-    if (RSLB == 0) {
-        RSLB <- '< 0.00001'
-    } else if (nchar(RSLB) < 7) {
-        RSLB <- paste0(RSLB,0)
-    }
-    
-    output.table <- matrix(c(format(RSLL, scientific=F), format(RSUL, scientific=F), format(RSLB, scientific=F), format(plevel, scientific=F)), nrow=1, ncol=4)
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound', 'Plevel')
     return(output.table)
 
