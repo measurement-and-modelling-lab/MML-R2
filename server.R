@@ -58,7 +58,7 @@ shinyServer(function(input, output, session) {
         arguments <- list(...)
         for (a in arguments) {
             a <- as.numeric(a)
-            if (a <= .6 || a >= .999) {
+            if (a < .6 || a > .999) {
                 stop("Confidence level must be between 0.6 and 0.999, inclusive.")
             }
         }
