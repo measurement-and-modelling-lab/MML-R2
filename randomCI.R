@@ -1,32 +1,37 @@
 function (n, k, Rsq, conlev) {
 
     ##Implementation based off the paper "Towards using confidence intervals to compare correlations" (Zou, 2007)
-    
+
     Bisection <- function (n, k, Rsq, conlev) {
 
         maxiter <- 50 ## maximum number of iterations
-        pul <- (1-conlev)/2 
-        pll <- 1-(1-conlev)/2 
-        df1 <- n-1 
+        pul <- (1-conlev)/2
+        pll <- 1-(1-conlev)/2
+        df1 <- n-1
         df2 <- n-k-1
         Rsqtilde <- Rsq/(1-Rsq)
 
-        check <- pf(df2*Rsqtilde/k,k,df2)  
+        check <- suppressWarnings(pf(df2*Rsqtilde/k,k,df2))
 
-        if (check <= pul){  
-            lower =NULL
-            upper =NULL 
+        if (is.nan(check)) {
+            stop("Confidence interval calculation failed.")
         }
+
+        if (check <= pul){
+            lower = NULL
+            upper = NULL
+        }
+
         if (check <= pll){
-            lower <- NULL 
-        } 
+            lower <- NULL
+        }
 
         for(type in 0:1){
             if (type == 1){
                 criterion <- pul ## To Find Upper Limit
             }
             else{
-                criterion <- pll ## To Find Lower Limit 
+                criterion <- pll ## To Find Lower Limit
             }
 
             x1 <- 0
@@ -45,7 +50,7 @@ function (n, k, Rsq, conlev) {
                             } else {
                                 yy <- x1/(1-x1)
                             }
-                            
+
                             gamma <- sqrt(1+yy)
                             phi1 <- df1*(gamma**2-1)+k
                             phi2 <- df1*(gamma**4-1)+k
@@ -54,7 +59,7 @@ function (n, k, Rsq, conlev) {
                             nu <- (phi2-2*yy*gamma*(sqrt(df1*df2)))/g**2
                             lambdau <- yy*gamma*(sqrt(df1*df2))/g**2
                             limit<- df2*Rsqtilde/(nu*g)
-                            diff <- pf(limit,nu,df2,lambdau)-criterion 
+                            diff <- pf(limit,nu,df2,lambdau)-criterion
                             if (root == 1){
                                 diff3 <- diff
                             } else {
@@ -68,7 +73,7 @@ function (n, k, Rsq, conlev) {
                     }
                     else {
                         x1 <- x3
-                        upper <- x3   
+                        upper <- x3
                     }
                 }
             }

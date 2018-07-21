@@ -12,13 +12,17 @@ function (N, k, RS, clevel) {
 
     tol <- 0.00000001
 
+    check <- suppressWarnings(qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE))
+    if (is.nan(check)) {
+        stop("Confidence interval calculation failed.")
+    }
     
     ## Lower limit
     FLL <- qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE) 
     RSLL <- (FLL/df2)/((1/df1)+(FLL/df2))
     ncLL <- N*(RSLL/(1-RSLL))
     
-    if (is.na(abs((pf(Fobs,df1,df2,ncp=ncLL))-ulimit)> tol)) {
+    if (is.na(abs((pf(Fobs,df1,df2,ncp=ncLL))-ulimit) > tol)) {
         stop("Confidence interval calculation failed.")
     }
     

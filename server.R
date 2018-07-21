@@ -192,7 +192,6 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$n, input$k, input$r, input$confidence)
-            areNumeric(input$n, input$k, input$r, input$confidence)
             areIntegers(input$n, input$k)
             areBetween0And1(input$r)
             areValidCLs(input$confidence)
@@ -232,7 +231,6 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$n, input$k, input$r, input$confidence)
-            areNumeric(input$n, input$k, input$r, input$confidence)
             areIntegers(input$n, input$k)
             areBetween0And1(input$r)
             areValidCLs(input$confidence)
@@ -273,7 +271,6 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$n, input$k, input$rho, input$alpha)
-            areNumeric(input$n, input$k, input$rho, input$alpha)
             areIntegers(input$n, input$k)
             areBetween0And1(input$rho, input$alpha)
             if (input$k < 2) {
@@ -313,7 +310,6 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$k, input$rho, input$alpha, input$power)
-            areNumeric(input$k, input$rho, input$alpha, input$power)
             areIntegers(input$k)
             areBetween0And1(input$rho, input$alpha, input$power)
             if (k < 2) {
