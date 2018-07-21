@@ -59,6 +59,6 @@ function (k, rho, alpha, power) {
     rowname2 <- paste0("N = ", Nhigh)
     colnames(output.table) <- c(rowname1, rowname2)
     rownames(output.table) <- "<b>Power</b>"
-    return(output.table)
 
+    return(output.table)
 }

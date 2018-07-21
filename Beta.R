@@ -157,12 +157,6 @@ function(cx, cxy, vy, N, alpha, familywise) {
 	CIs[i,] <- c(beta[i] - tc[i] * DELse[i], beta[i], beta[i] + tc[i] * DELse[i])
     }
 
-    CIs <- round(CIs, digits)
-    DELse <- round(DELse, digits)
-    alpha <- round(alpha, digits)
-    p.values <- round(p.values, digits)
-    p.values[p.values == 0] <- "< 0.00001"
-    test.statistic <- round(test.statistic, digits)
 
     ## Assemble output
     output <- cbind(CIs, DELse, test.statistic, p.values, alpha)
@@ -170,5 +164,4 @@ function(cx, cxy, vy, N, alpha, familywise) {
     colnames(output) <- c("Lower", "Point", "Upper", "Std. Error", paste0("t<sub>", N-p-1, "</sub>"), "p", "&alpha;")
 
     return(output)
-
 }

@@ -10,70 +10,8 @@ shinyServer(function(input, output, session) {
         options(shiny.sanitize.errors = FALSE)
     })
 
-
-
-    ## Simultaneously require that several input$ variables exist before moving on
-    massValidateNeed <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            validate(need(a, ""))
-        }
-    }
-
-
-    ## Check that the input doesn't have too many digits
-    areShort <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            if (nchar(a) > 7) {
-                stop("Input cannot be more than 7 digits long.")
-            }
-        }
-    }
-
-
-    ## Determine whether several inputs are integers
-    areIntegers <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            if (grepl("\\D", a) || grepl("\\D", a)) {
-                stop("A decimal number was given in place of an integer.")
-            }
-        }
-    }
-
-    ## Determine whether several inputs are numeric
-    areNumeric <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            a <- as.numeric(a)
-            if (is.na(a)) {
-                stop("A character string was given in place of a number.")
-            }
-        }
-    }
-
-    ## Determine whether a confidence level is valid
-    areValidCLs <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            a <- as.numeric(a)
-            if (a < .6 || a > .999) {
-                stop("Confidence level must be between 0.6 and 0.999, inclusive.")
-            }
-        }
-    }
-
-    ## Determine whether a number is betwee 0 and 1 exclusive
-    areBetween0And1 <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            a <- as.numeric(a)
-            if (a <= 0 || a >= 1) {
-                stop("A value that should be bounded by 0 and 1 is not.")
-            }
-        }
-    }
+    ## Import a bunch of mass error checking functions
+    source("errorcheck.R")
 
     ## Global values
     values <- reactiveValues()
@@ -89,7 +27,6 @@ shinyServer(function(input, output, session) {
     values$predictors <- ""
     values$criterion <- ""
     values$old.output <-c("","","","","","","","","","")
-
 
 
     output$selector <- renderUI({ ## This is necessary to get subscripts and superscripts
@@ -116,25 +53,25 @@ shinyServer(function(input, output, session) {
 
         ## Create input widgets, pulling default values from global
         if (values$calculation == "fixedci") {
-            html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                              textInput("k", "Number of variables, including criterion:", values$k),
-                              textInput("r", "R squared:", values$r),
-                              textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95))
+            html_ui <- paste0(numericInput("n", "Number of observations:", values$n),
+                              numericInput("k", "Number of variables, including criterion:", values$k),
+                              numericInput("r", "R squared:", values$r),
+                              numericInput("confidence", "Confidence level:", values$confidence))
         } else if (values$calculation == "randomci") {
-            html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                              textInput("k", "Number of variables, including criterion:", values$k),
-                              textInput("r", "R squared:", values$r),
-                              textInput("confidence", "Confidence level:", values$confidence, placeholder = 0.95))
+            html_ui <- paste0(numericInput("n", "Number of observations:", values$n),
+                              numericInput("k", "Number of variables, including criterion:", values$k),
+                              numericInput("r", "R squared:", values$r),
+                              numericInput("confidence", "Confidence level:", values$confidence))
         } else if (values$calculation == "power") {
-            html_ui <- paste0(textInput("n", "Number of observations:", values$n),
-                              textInput("k", "Number of variables, including criterion:", values$k),
-                              textInput("rho", "Rho squared:", values$rho),
-                              textInput("alpha", "Alpha:", values$alpha, placeholder = 0.05))
+            html_ui <- paste0(numericInput("n", "Number of observations:", values$n),
+                              numericInput("k", "Number of variables, including criterion:", values$k),
+                              numericInput("rho", "Rho squared:", values$rho),
+                              numericInput("alpha", "Alpha:", values$alpha))
         } else if (values$calculation == "samplesize") {
-            html_ui <- paste0(textInput("k", "Number of variables, including criterion:", values$k),
-                              textInput("rho", "Rho squared:", values$rho),
-                              textInput("alpha", "Alpha:", values$alpha, placeholder = 0.05),
-                              textInput("power", "Power desired:", values$power, placeholder = 0.8))
+            html_ui <- paste0(numericInput("k", "Number of variables, including criterion:", values$k),
+                              numericInput("rho", "Rho squared:", values$rho),
+                              numericInput("alpha", "Alpha:", values$alpha),
+                              numericInput("power", "Power desired:", values$power))
         } else if (values$calculation == "beta") {
 
             validate(need(input$datafile, "")) ## Check that data file has been uploaded
@@ -255,10 +192,16 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$n, input$k, input$r, input$confidence)
+            areNumeric(input$n, input$k, input$r, input$confidence)
             areIntegers(input$n, input$k)
-            areNumeric(input$r, input$confidence)
             areBetween0And1(input$r)
             areValidCLs(input$confidence)
+            if (input$k < 2) {
+                stop("There must be at least two variables.")
+            }
+            if (input$n <= input$k) {
+                stop("There must be more observations than variables.")
+            }
 
             ## Convert to numeric
             n <- as.integer(input$n)
@@ -270,6 +213,13 @@ shinyServer(function(input, output, session) {
             fixedCI <- dget("fixedCI.R")
             foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", 1-&alpha;=", confidence.level)
             new.output <- fixedCI(n, k, r, confidence.level)
+
+            ## Round output
+            new.output <- round(new.output, 5)
+            new.output[new.output == 1] <- "> 0.99999"
+            new.output[new.output == 0] <- "< 0.00001"
+
+            
             new.output <- htmlTable(new.output,
                                     caption = "<b>Confidence Interval (Fixed Regressor)</b>",
                                     css.cell = "padding-left: 2em; padding-right: 2em;",
@@ -282,10 +232,17 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$n, input$k, input$r, input$confidence)
+            areNumeric(input$n, input$k, input$r, input$confidence)
             areIntegers(input$n, input$k)
-            areNumeric(input$r, input$confidence)
             areBetween0And1(input$r)
             areValidCLs(input$confidence)
+            if (input$k < 2) {
+                stop("There must be at least two variables!")
+            }
+            if (input$n <= input$k) {
+                stop("There must be more observations than variables.")
+            }
+
 
             ## Convert to numeric
             n <- as.integer(input$n)
@@ -296,8 +253,14 @@ shinyServer(function(input, output, session) {
             ## Run the test
             randomCI <- dget("randomCI.R")
             new.output <- randomCI(n, k, r, confidence.level)
+
+            ## Round output
+            new.output <- round(new.output, 5)
+            new.output[new.output == 1] <- "> 0.99999"
+            new.output[new.output == 0] <- "< 0.00001"
+            
+            ## Format output table
             foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", 1-&alpha;=", confidence.level)
-            new.output <- randomCI(n, k, r, confidence.level)
             new.output <- htmlTable(new.output,
                                     caption = "<b>Confidence Interval (Random Regressor)</b>",
                                     css.cell = "padding-left: 2em; padding-right: 2em;",
@@ -310,9 +273,16 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$n, input$k, input$rho, input$alpha)
+            areNumeric(input$n, input$k, input$rho, input$alpha)
             areIntegers(input$n, input$k)
-            areNumeric(input$rho, input$alpha)
             areBetween0And1(input$rho, input$alpha)
+            if (input$k < 2) {
+                stop("There must be at least two variables!")
+            }
+            if (input$n <= input$k) {
+                stop("There must be more observations than variables.")
+            }
+
 
             ## Convert to numeric
             n <- as.integer(input$n)
@@ -343,9 +313,13 @@ shinyServer(function(input, output, session) {
 
             ## Error checking
             areShort(input$k, input$rho, input$alpha, input$power)
-            areIntegers(input$n)
-            areNumeric(input$rho, input$alpha, input$power)
+            areNumeric(input$k, input$rho, input$alpha, input$power)
+            areIntegers(input$k)
             areBetween0And1(input$rho, input$alpha, input$power)
+            if (k < 2) {
+                stop("There must be at least two variables!")
+            }
+
 
             ## Convert to numeric
             k <- as.integer(input$k)
@@ -405,6 +379,10 @@ shinyServer(function(input, output, session) {
             Beta <- dget("Beta.R")
             new.output <- Beta(cx, cxy, vy, N, alpha, familywise)
 
+            new.output <- round(new.output, 5)
+            new.output[new.output==0] <- "< 0.00001"
+            new.output[new.output==1] <- "> 0.99999"
+
             familywise.labels <- list("uncorrected"="Uncontrolled",
                                       "bonferroni"="Bonferroni",
                                       "sidak"="Dunn-Sidak",
@@ -441,9 +419,15 @@ shinyServer(function(input, output, session) {
             ## Run the test
             R2 <- dget("R2.R")
             new.output <- R2(data, predictors, criterion)
+            new.output <- round(new.output, 5)
+            if (new.output == 1) {
+                new.output <- "> 0.99999"
+            } else if (new.output == 0) {
+                new.output <- "< 0.00001"
+            }
 
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
-            new.output <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> = ", new.output[1,1], "<br>", foot, "<p>")
+            new.output <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> = ", new.output, "<br>", foot, "<p>")
 
         }
 

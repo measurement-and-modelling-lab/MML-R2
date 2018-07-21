@@ -92,9 +92,6 @@ function (n, k, Rsq, conlev) {
 
     ## Format input matrix
     output.table <- matrix(c(lower, upper, lbound), nrow=1, ncol=3)
-    output.table <- round(output.table, 5)
-    output.table[output.table == 1] <- "> 0.99999"
-    output.table[output.table == 0] <- "< 0.00001"
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound')
 
     return(output.table)

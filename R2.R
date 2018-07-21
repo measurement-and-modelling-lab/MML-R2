@@ -12,11 +12,6 @@ function (data, X, Y) {
     Rxx <- data[X, X] # matrix of the correlations between the predictors
     b <- solve(Rxx) %*% Rxy
     R2 <- t(b) %*% Rxy
-    R2 <- round(R2, 5)
-
-    R2 <- matrix(R2, nrow=1, ncol=1)
-    colnames(R2) <- "R<sup>2</sup>"
 
     return(R2)
-    
 }

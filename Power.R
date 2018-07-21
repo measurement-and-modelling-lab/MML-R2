@@ -15,6 +15,6 @@ function(N, k, rho, alpha){
     ##Create formatted output
     output.table <- matrix(power, nrow=1, ncol=1)
     colnames(output.table) <- "Power"
-    return(output.table)
 
+    return(output.table)
 }

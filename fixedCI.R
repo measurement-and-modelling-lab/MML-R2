@@ -64,13 +64,7 @@ function (N, k, RS, clevel) {
     plevel <- 1 - pf(Fobs, df1, N-df1-1, ncp=0)
     
     output.table <- matrix(c(RSLL, RSUL, RSLB, plevel), nrow=1, ncol=4)
-
-    ## Round output
-    output.table <- round(output.table, 5)
-    output.table[output.table == 1] <- "> 0.99999"
-    output.table[output.table == 0] <- "< 0.00001"
-
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound', 'Plevel')
-    return(output.table)
 
+    return(output.table)
 }
