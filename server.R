@@ -192,8 +192,7 @@ shinyServer(function(input, output, session) {
             ## Error checking
             areShort(input$n, input$k, input$r, input$confidence)
             areIntegers(input$n, input$k)
-            areBetween0And1(input$r)
-            areValidCLs(input$confidence)
+            areBetween0And1(input$r, input$confidence)
             if (input$k < 2) {
                 stop("There must be at least two variables.")
             }
@@ -231,8 +230,7 @@ shinyServer(function(input, output, session) {
             ## Error checking
             areShort(input$n, input$k, input$r, input$confidence)
             areIntegers(input$n, input$k)
-            areBetween0And1(input$r)
-            areValidCLs(input$confidence)
+            areBetween0And1(input$r, input$confidence)
             if (input$k < 2) {
                 stop("There must be at least two variables!")
             }
@@ -311,7 +309,7 @@ shinyServer(function(input, output, session) {
             areShort(input$k, input$rho, input$alpha, input$power)
             areIntegers(input$k)
             areBetween0And1(input$rho, input$alpha, input$power)
-            if (k < 2) {
+            if (input$k < 2) {
                 stop("There must be at least two variables!")
             }
 
@@ -348,14 +346,17 @@ shinyServer(function(input, output, session) {
             if (as.character(input$criterion) %in% input$predictors) {
                 stop("A variable cannot be both a predictor and the criterion.")
             }
+
             if (length(input$predictors) < 2) {
                 stop("You must have at least two predictors.")
             }
+
             if (NA %in% as.numeric(data)) {
                 stop("Your data has missing or non-numeric elements.")
             }
 
-            ## Define arguments
+            areBetween0And1(input$confidence)
+
             if (ncol(data) != nrow(data)) {
                 N <- nrow(data)
                 data <- cov(data)
@@ -363,6 +364,8 @@ shinyServer(function(input, output, session) {
                 areIntegers(input$n)
                 N <- as.numeric(input$n)
             }
+
+
             predictors <- as.numeric(input$predictors)
             criterion <- as.numeric(input$criterion)
             familywise <- input$familywise

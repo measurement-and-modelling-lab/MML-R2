@@ -1,7 +1,7 @@
 function (N, k, RS, clevel) {
 
-    ulimit <- 1-((1-clevel)/2)
     llimit <- (1-clevel)/2
+    ulimit <- clevel + llimit
 
     df1 <- k-1
     df2 <- N - df1 - 1
@@ -12,34 +12,43 @@ function (N, k, RS, clevel) {
 
     tol <- 0.00000001
 
-    check <- suppressWarnings(qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE))
-    if (is.nan(check)) {
-        stop("Confidence interval calculation failed.")
-    }
-    
-    ## Lower limit
     FLL <- qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE) 
     RSLL <- (FLL/df2)/((1/df1)+(FLL/df2))
     ncLL <- N*(RSLL/(1-RSLL))
     
-    if (is.na(abs((pf(Fobs,df1,df2,ncp=ncLL))-ulimit) > tol)) {
+    FUL <- qf(ulimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE)
+    RSUL <- (FUL/df2)/((1/df1)+(FUL/df2))
+    ncUL <- N*(RSUL/(1-RSUL))
+
+
+    ## Error checking
+    check <- c()
+    check[1] <- suppressWarnings(qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE))
+    check[2] <- suppressWarnings(pf(Fobs,df1,df2,ncp=ncLL))
+    check[3] <- suppressWarnings(qf(ulimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE))
+    check[4] <- suppressWarnings(pf(Fobs,df1,df2,ncp=ncUL))
+    if (TRUE %in% is.nan(check)) {
         stop("Confidence interval calculation failed.")
     }
     
-    while(abs((pf(Fobs,df1,df2,ncp=ncLL))-ulimit)> tol ) {
+    
+    ## Lower limit
+    iterations <- 0
+    while(abs((pf(Fobs,df1,df2,ncp=ncLL))-ulimit) > tol ) {
         Pfncll <- pf(Fobs,df1,df2,ncp=ncLL)
         ncLL <- -((Pfncll-ulimit)/(Pfncll -.5))*(ncLL-nc)+ncLL
         if (ncLL < 0) {
 	    ncLL <- 0
             break
         }
+        iterations <- iterations+1
+        if (iterations > 1000) {
+            stop("Confidence interval calculation failed.")
+        }
     }
 
 
     ## Upper limit
-    FUL <- qf(ulimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE)
-    RSUL <- (FUL/df2)/((1/df1)+(FUL/df2))
-    ncUL <- N*(RSUL/(1-RSUL))
     while(abs((pf(Fobs,df1,df2,ncp=ncUL))-llimit)> tol ) {
         Pfncul <- pf(Fobs,df1,df2,ncp=ncUL)
         ncUL <- -((Pfncul-llimit)/(Pfncul -.5))*(ncUL-nc)+ncUL
@@ -56,6 +65,7 @@ function (N, k, RS, clevel) {
     FLB <- qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE) 
     RSLB <- (FLB/df2)/((1/df1)+(FLB/df2))
     ncLB <- N*(RSLB/(1-RSLB))
+    iterations <- 0
     while(abs((pf(Fobs,df1,df2,ncp=ncLB))-ulimit)> tol ) {
         Pfnclb <- pf(Fobs,df1,df2,ncp=ncLB)
         ncLB <- -((Pfnclb-ulimit)/(Pfnclb -.5))*(ncLB-nc)+ncLB
@@ -63,7 +73,10 @@ function (N, k, RS, clevel) {
 	    ncLB <- 0
             break
         }
-    }
+        iterations <- iterations+1
+        if (iterations > 1000) {
+            stop("Confidence interval calculation failed.")
+        }    }
 
     plevel <- 1 - pf(Fobs, df1, N-df1-1, ncp=0)
     

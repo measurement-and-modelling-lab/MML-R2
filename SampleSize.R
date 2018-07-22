@@ -24,6 +24,15 @@ function (k, rho, alpha, power) {
         })
 
         fcrit <- qf(1-alpha, df1, df2)
+
+        tryCatch({
+            pf(fcrit, df1, df1, ncp=nc)
+        }, warning = function(w) {
+            stop("Sample size calculation failed.")
+        }, error = function(e) {
+            stop("Sample size calculation failed.")
+        })
+        
         powerest <- 1-pf(fcrit, df1, df1, ncp=nc) ## Power Estimate
 
         ## Modified bisection
@@ -41,6 +50,9 @@ function (k, rho, alpha, power) {
         }
 
         count <- count + 1
+        if (count > 1000) {
+            stop("Sample size calculation failed")
+        }
     }
 
     Nlow <- floor(N)

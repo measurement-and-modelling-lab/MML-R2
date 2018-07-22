@@ -12,25 +12,23 @@ function (n, k, Rsq, conlev) {
         Rsqtilde <- Rsq/(1-Rsq)
 
         check <- suppressWarnings(pf(df2*Rsqtilde/k,k,df2))
-
         if (is.nan(check)) {
             stop("Confidence interval calculation failed.")
         }
 
-        if (check <= pul){
+        if (check <= pul) {
             lower = NULL
             upper = NULL
         }
 
-        if (check <= pll){
+        if (check <= pll) {
             lower <- NULL
         }
 
-        for(type in 0:1){
-            if (type == 1){
+        for (type in 0:1) {
+            if (type == 1) {
                 criterion <- pul ## To Find Upper Limit
-            }
-            else{
+            } else {
                 criterion <- pll ## To Find Lower Limit
             }
 
@@ -60,6 +58,11 @@ function (n, k, Rsq, conlev) {
                             lambdau <- yy*gamma*(sqrt(df1*df2))/g**2
                             limit<- df2*Rsqtilde/(nu*g)
                             diff <- pf(limit,nu,df2,lambdau)-criterion
+
+                            if (is.nan(diff)) {
+                                stop("Confidence interval calculation failed.")
+                            }
+                            
                             if (root == 1){
                                 diff3 <- diff
                             } else {
@@ -68,10 +71,9 @@ function (n, k, Rsq, conlev) {
                         }
                     }
 
-                    if (diff1*diff3<0) {
+                    if (diff1*diff3 < 0) {
                         x2 <- x3
-                    }
-                    else {
+                    } else {
                         x1 <- x3
                         upper <- x3
                     }

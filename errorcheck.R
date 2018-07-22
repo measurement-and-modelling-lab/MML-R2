@@ -29,24 +29,12 @@ areIntegers <- function(...) {
 }
 
 
-## Determine whether a confidence level is valid
-areValidCLs <- function(...) {
-    arguments <- list(...)
-    for (a in arguments) {
-        a <- as.numeric(a)
-        if (a < .6 || a > .999) {
-            stop("Confidence level must be between 0.6 and 0.999, inclusive.")
-        }
-    }
-}
-
-## Determine whether a number is between 0 and 1 exclusive
+## Determine whether a number is between 0 and 1 inclusive
 areBetween0And1 <- function(...) {
     arguments <- list(...)
     for (a in arguments) {
-        a <- as.numeric(a)
-        if (a <= 0 || a >= 1) {
-            stop("A value that should be between 0 and 1 (exclusive) is not.")
+        if (a < 0 || a > 1) {
+            stop("A value that should be bounded by 0 and 1 is not.")
         }
     }
 }

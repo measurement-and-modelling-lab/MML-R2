@@ -153,9 +153,15 @@ function(cx, cxy, vy, N, alpha, familywise) {
 
     tc <- qt(alpha/2, N-p-1, lower = F)
 
+    ## Error check
+    if (FALSE %in% is.finite(tc)) {
+        stop("Confidence interval calculation failed.")
+    }
+
     for (i in 1:p) {
 	CIs[i,] <- c(beta[i] - tc[i] * DELse[i], beta[i], beta[i] + tc[i] * DELse[i])
     }
+
 
 
     ## Assemble output
