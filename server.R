@@ -55,22 +55,22 @@ shinyServer(function(input, output, session) {
         if (values$calculation == "fixedci") {
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("r", "R squared:", values$r, 0, 1, 0.01),
+                              numericInput("r", "R squared:", values$r, 0.01, 0.99, 0.01),
                               numericInput("confidence", "Confidence level:", values$confidence, 0.6, 0.99, 0.01))
         } else if (values$calculation == "randomci") {
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("r", "R squared:", values$r, 0, 1, 0.01),
+                              numericInput("r", "R squared:", values$r, 0.01, 0.99, 0.01),
                               numericInput("confidence", "Confidence level:", values$confidence, 0.6, 0.99, 0.01))
         } else if (values$calculation == "power") {
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("rho", "Rho squared:", values$rho, 0, 1, 0.01),
+                              numericInput("rho", "Rho squared:", values$rho, 0.01, 0.99, 0.01),
                               numericInput("alpha", "Alpha:", values$alpha, 0.01, 0.99, 0.01))
         } else if (values$calculation == "samplesize") {
             html_ui <- paste0(numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("rho", "Rho squared:", values$rho, 0, 1, 0.01),
-                              numericInput("alpha", "Alpha:", values$alpha, 0, 1, 0.01),
+                              numericInput("rho", "Rho squared:", values$rho, 0.01, 0.99, 0.01),
+                              numericInput("alpha", "Alpha:", values$alpha, 0.01, 0.99, 0.01),
                               numericInput("power", "Power desired:", values$power, 0.01, 0.99, 0.01))
         } else if (values$calculation == "beta") {
 

@@ -40,13 +40,13 @@ areValidCLs <- function(...) {
     }
 }
 
-## Determine whether a number is betwee 0 and 1 exclusive
+## Determine whether a number is between 0 and 1 exclusive
 areBetween0And1 <- function(...) {
     arguments <- list(...)
     for (a in arguments) {
         a <- as.numeric(a)
         if (a <= 0 || a >= 1) {
-            stop("A value that should be bounded by 0 and 1 is not.")
+            stop("A value that should be between 0 and 1 (exclusive) is not.")
         }
     }
 }
