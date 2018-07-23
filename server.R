@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
     output$selector <- renderUI({ ## This is necessary to get subscripts and superscripts
 
         ## You can't use HTML() in the choices argument, only in the two punch combo choiceNames/choiceValues
-        ## The drop-down menu input, selectInput, doesn't have those, so we're using radioButtons instead
+        ## The drop-down menu input, selectInput, doesn't have those, so we're using radioButtons even though the drop-down is slimmer/prettier
         html_ui <- paste0(radioButtons("calculation", "Calculation to run:",
                                        choiceNames = list(HTML("Confidence interval on R<sup>2</sup> (fixed regressor)"),
                                                           HTML("Confidence interval on R<sup>2</sup> (random regressor)"),
@@ -74,96 +74,72 @@ shinyServer(function(input, output, session) {
                               numericInput("power", "Power desired:", values$power, 0, 1, 0.01))
         } else if (values$calculation == "beta") {
 
-            validate(need(input$datafile, "")) ## Check that data file has been uploaded
+            ## Check that data file has been uploaded
+            validate(need(input$datafile, ""))
 
-            ## Check that R can read the data file as a .csv
+
+            ## Error checking and data import
             tryCatch({
-                read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+                data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
             }, warning = function(w) {
                 stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
             }, error = function(e) {
                 stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
             })
-
-            ## Load data and count the number of variables
-            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-            variables <- ncol(data)
-
-            if (variables > 16) {
+            if (ncol(data) > 16) {
                 stop("You cannot have more than 16 variables.")
             }
-
-            options <- 1:variables
-            names(options) <- options
-            html_ui <- ''
 
 
             ## If the data is a correlation matrix, create sample size input
             if (nrow(data) == ncol(data)) {
-                html_ui <- paste0(html_ui, numericInput("n", "Number of observations:", values$n))
+                html_ui <- paste0(numericInput("n", "Number of observations:", values$n))
+            } else {
+                html_ui <- ""
             }
 
 
-            ## Create confidence coefficient and method input
+            ## Create confidence coefficient and FW error control inputs
+            FW.choices <- c("uncorrected", "bonferroni", "sidak", "stepdown_bonferroni", "stepdown_sidak")
+            names(FW.choices) <- c("None", "Bonferroni", "Dunn-Sidak", "Stepdown Bonferroni", "Stepdown Dunn-Sidak")
+            options <- 1:ncol(data)
+            names(options) <- options
             html_ui <- paste0(html_ui,
                               numericInput("confidence", "Confidence level:", values$confidence, 0, 1, 0.01),
-                              radioButtons("familywise",
-                                           "Familywise error control:",
-                                           choices = c("None"="uncorrected",
-                                                       "Bonferroni"="bonferroni",
-                                                       "Dunn-Sidak"="sidak",
-                                                       "Stepdown Bonferroni"="stepdown_bonferroni",
-                                                       "Stepdown Dunn-Sidak"="stepdown_sidak")),
+                              radioButtons("familywise","Familywise error control:", FW.choices),
                               div(style="display: inline-block;vertical-align:top; width: 100px;",
-                                  checkboxGroupInput("predictors", "Predictors:",
-                                                     choices=options)),
+                                  checkboxGroupInput("predictors", "Predictors:", choices=options)),
                               div(style="display: inline-block;vertical-align:top; width: 50px;",
-                                  radioButtons("criterion", "Criterion:", choices=options))
-                              )
+                                  radioButtons("criterion", "Criterion:", choices=options)))
 
         } else if (values$calculation == "r2") {
 
             ## Check that the data file has been uploaded
             validate(need(input$datafile, ""))
 
-            ## Check that R can read the data file as a .csv
+
+            ## Error checking / data import
             tryCatch({
-                read.csv(file=input$datafile[[4]], head=FALSE, sep=",")
+                data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
             }, warning = function(w) {
                 stop("There was a problem reading your .csv file.")
             }, error = function(e) {
                 stop("There was a problem reading your .csv file.")
             })
-
-            ## Import data and save the number of variables
-            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-            variables <- ncol(data)
-
-            if (variables > 16) {
+            if (ncol(data) > 16) {
                 stop("You cannot have more than 16 variables.")
             }
 
-            options <- 1:variables
-            names(options) <- options
 
+            ## Create radio buttons for choosing the criterion and predictors
             html_ui <- ""
-
-            ## Create radio buttons for choosing the predictors
+            options <- 1:ncol(data)
+            names(options) <- options
             html_ui <- paste0(html_ui,
                               div(style="display: inline-block;vertical-align:top; width: 100px;",
-                                  checkboxGroupInput("predictors",
-                                                     "Predictors:",
-                                                     options,
-                                                     values$predictors)))
-
-            ## Create radio buttons for choosing the criterion
-            html_ui <- paste0(html_ui,
+                                  checkboxGroupInput("predictors", "Predictors:", options, values$predictors)),
                               div(style="display: inline-block;vertical-align:top; width: 50px;",
-                                  radioButtons("criterion",
-                                               "Criterion:",
-                                               options,
-                                               values$criterion)))
-
+                                  radioButtons("criterion", "Criterion:", options, values$criterion)))
         }
         HTML(html_ui)
     })
@@ -355,14 +331,8 @@ shinyServer(function(input, output, session) {
             massValidateNeed(input$datafile, input$predictors, input$criterion, input$confidence, input$familywise)
 
 
-            ## Import data (make this a try catch)
-            tryCatch({
-                data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-            }, warning = function(w) {
-                stop("Your data could not be imported as a csv.")
-            }, error = function(e) {
-                stop("Your data could not be imported as a csv.")
-            })
+            ## Import data
+            data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
 
 
             ## If the upper triangle of a correlation matrix is empty, make the matrix symmetric
@@ -450,37 +420,14 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$datafile, input$predictors, input$criterion)
 
-
-            ## Define arguments
+            ## Import arguments
             predictors <- as.numeric(input$predictors)
             criterion <- as.numeric(input$criterion)
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
 
-
-            ## Error checking
-            if (as.character(input$criterion) %in% input$predictors) {
-                stop("A variable cannot be both a predictor and the criterion.")
-            }
-            if (NA %in% as.numeric(data)) {
-                stop("Your data has missing or non-numeric elements.")
-            }
-
-
             ## Run the test
             R2 <- dget("R2.R")
             new.output <- R2(data, predictors, criterion)
-            new.output <- round(new.output, 5)
-
-
-            ## Round output
-            if (new.output == 1) {
-                new.output <- "> 0.99999"
-            } else if (new.output == 0) {
-                new.output <- "< 0.00001"
-            } else {
-                new.output <- paste0("= ", new.output)
-            }
-
 
             ## Assemble output table
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
