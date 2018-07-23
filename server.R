@@ -292,30 +292,9 @@ shinyServer(function(input, output, session) {
             massValidateNeed(input$k, input$rho, input$alpha, input$power)
 
 
-            ## Error checking
-            areShort(input$k, input$rho, input$alpha, input$power)
-            areIntegers(input$k)
-            areBetween0And1(input$rho, input$alpha, input$power)
-            if (input$k < 2) {
-                stop("There must be at least two variables.")
-            }
-
-
             ## Run the test; if errors are encountered, return a generic error message
             SampleSize <- dget("SampleSize.R")
-            tryCatch({
-                new.output <- SampleSize(input$k, input$rho, input$alpha, input$power)
-            }, warning = function(w) {
-                stop("Sample size calculation failed.")
-            }, error = function(e) {
-                stop("Sample size calculation failed.")
-            })
-
-
-            ## Round output
-            new.output <- round(new.output, 5)
-            new.output[new.output == 1] <- "> 0.99999"
-            new.output[new.output == 0] <- "< 0.00001"
+            new.output <- SampleSize(input$k, input$rho, input$alpha, input$power)
 
 
             ## Assemble output table

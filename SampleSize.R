@@ -1,8 +1,18 @@
 function (k, rho, alpha, power) {
 
+    source("errorcheck.R")
+    
+    ## Check for errors
+    areShort(k, rho, alpha, power)
+    areIntegers(k)
+    areBetween0And1(rho, alpha, power)
+    if (k < 2) {
+        stop("There must be at least two variables.")
+    }
 
+    ## Define values
     df1 <- k - 1
-    N <- 1000
+    N <- 1000 ## starting point
     i <- 1
     increment <- 1000 ## Special value used for bisection range finding
     count <- 0
@@ -55,12 +65,18 @@ function (k, rho, alpha, power) {
     powerhigh <- Power(Nhigh,k,rho,alpha)
 
 
-    ## Format output table
+    ## Assemble output matrix
     output.table <- matrix(c(powerlow, powerhigh), nrow=1, ncol=2)
     rowname1 <- paste0("N = ", Nlow)
     rowname2 <- paste0("N = ", Nhigh)
     colnames(output.table) <- c(rowname1, rowname2)
     rownames(output.table) <- "<b>Power</b>"
+
+    
+    ## Round output
+    output.table <- round(output.table, 5)
+    output.table[output.table == 1] <- "> 0.99999"
+    output.table[output.table == 0] <- "< 0.00001"
 
     return(output.table)
 }
