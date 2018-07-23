@@ -315,6 +315,7 @@ shinyServer(function(input, output, session) {
                 stop("Power calculation failed.")
             })
 
+
             ## Round output
             new.output <- round(new.output, 5)
             if (new.output == 1) {
@@ -338,7 +339,7 @@ shinyServer(function(input, output, session) {
             areIntegers(input$k)
             areBetween0And1(input$rho, input$alpha, input$power)
             if (input$k < 2) {
-                stop("There must be at least two variables!")
+                stop("There must be at least two variables.")
             }
 
 
