@@ -212,7 +212,15 @@ shinyServer(function(input, output, session) {
             ## Run the tests
             fixedCI <- dget("fixedCI.R")
             foot <- paste0("N=", n, ", k=", k, ", R<sup>2</sup>=", r, ", 1-&alpha;=", confidence.level)
-            new.output <- fixedCI(n, k, r, confidence.level)
+
+            ## Run the test; if errors are encountered, return a generic error message
+            tryCatch({
+                new.output <- fixedCI(n, k, r, confidence.level)
+            }, warning = function(w) {
+                stop("Confidence interval calculation failed.")
+            }, error = function(e) {
+                stop("Confidence interval calculation failed.")
+            })
 
             ## Round output
             new.output <- round(new.output, 5)
@@ -250,7 +258,16 @@ shinyServer(function(input, output, session) {
 
             ## Run the test
             randomCI <- dget("randomCI.R")
-            new.output <- randomCI(n, k, r, confidence.level)
+
+            
+            ## Run the test; if errors are encountered, return a generic error message
+            tryCatch({
+                new.output <- randomCI(n, k, r, confidence.level)
+            }, warning = function(w) {
+                stop("Confidence interval calculation failed.")
+            }, error = function(e) {
+                stop("Confidence interval calculation failed.")
+            })
 
             ## Round output
             new.output <- round(new.output, 5)
@@ -287,21 +304,29 @@ shinyServer(function(input, output, session) {
             rho <- input$rho
             alpha <- input$alpha
 
+
+            ## Run the test; if errors are encountered, return a generic error message
             Power <- dget("Power.R")
-            new.output <- Power(n, k, rho, alpha)
+            tryCatch({
+                new.output <- Power(n, k, rho, alpha)
+            }, warning = function(w) {
+                stop("Power calculation failed.")
+            }, error = function(e) {
+                stop("Power calculation failed.")
+            })
 
             ## Round output
             new.output <- round(new.output, 5)
-            if (new.output[1,1] == 1) {
-                new.output[1,1] <- "> 0.99999"
-            } else if (new.output[1,1] == 0) {
-                new.output[1,1] <- "< 0.00001"
+            if (new.output == 1) {
+                new.output <- "> 0.99999"
+            } else if (new.output == 0) {
+                new.output <- "< 0.00001"
             } else {
-                new.output[1,1] <- paste0("= ", new.output[1,1])
+                new.output <- paste0("= ", new.output)
             }
 
             foot <- paste0("N=", n, ", k=", k, ", &rho;=", rho, ", &alpha;=", alpha)
-            new.output <- paste0("<p><b>Power</b><br>", "Power ", new.output[1,1], "<br>", foot, "<p>")
+            new.output <- paste0("<p><b>Power</b><br>", "Power ", new.output, "<br>", foot, "<p>")
 
         } else if (input$calculation == "samplesize") {
 
@@ -323,8 +348,15 @@ shinyServer(function(input, output, session) {
             alpha <- input$alpha
             power <- input$power
 
+            ## Run the test; if errors are encountered, return a generic error message
             SampleSize <- dget("SampleSize.R")
-            new.output <- SampleSize(k, rho, alpha, power)
+            tryCatch({
+                new.output <- SampleSize(k, rho, alpha, power)
+            }, warning = function(w) {
+                stop("Sample size calculation failed.")
+            }, error = function(e) {
+                stop("Sample size calculation failed.")
+            })
 
             ## Round output
             new.output <- round(new.output, 5)
@@ -377,8 +409,16 @@ shinyServer(function(input, output, session) {
             vy <- data[criterion, criterion]
             alpha <- 1 - as.numeric(input$confidence)
 
+            
+            ## Run the test; if errors are encountered, return a generic error message
             Beta <- dget("Beta.R")
-            new.output <- Beta(cx, cxy, vy, N, alpha, familywise)
+            tryCatch({
+                new.output <- Beta(cx, cxy, vy, N, alpha, familywise)
+            }, warning = function(w) {
+                stop("Standardised beta calculation failed.")
+            }, error = function(e) {
+                stop("Standardised beta calculation failed.")
+            })
 
             new.output <- round(new.output, 5)
             new.output[new.output==0] <- "< 0.00001"
@@ -425,10 +465,12 @@ shinyServer(function(input, output, session) {
                 new.output <- "> 0.99999"
             } else if (new.output == 0) {
                 new.output <- "< 0.00001"
+            } else {
+                new.output <- paste0("= ", new.output)
             }
 
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
-            new.output <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> = ", new.output, "<br>", foot, "<p>")
+            new.output <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> ", new.output, "<br>", foot, "<p>")
 
         }
 

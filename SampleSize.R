@@ -51,8 +51,8 @@ function (k, rho, alpha, power) {
 
     ## Calculate power using the lower N and the higher N
     Power <- dget("Power.R")
-    powerlow <- Power(Nlow,k,rho,alpha)[1,1]
-    powerhigh <- Power(Nhigh,k,rho,alpha)[1,1]
+    powerlow <- Power(Nlow,k,rho,alpha)
+    powerhigh <- Power(Nhigh,k,rho,alpha)
 
 
     ## Format output table
