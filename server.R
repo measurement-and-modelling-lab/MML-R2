@@ -247,29 +247,9 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$n, input$k, input$rho, input$alpha)
 
-
-            ## Error checking
-            areShort(input$n, input$k, input$rho, input$alpha)
-            areIntegers(input$n, input$k)
-            areBetween0And1(input$rho, input$alpha)
-            if (input$k < 2) {
-                stop("There must be at least two variables!")
-            }
-            if (input$n <= input$k) {
-                stop("There must be more observations than variables.")
-            }
-
-
             ## Run the test; if errors are encountered, return a generic error message
             Power <- dget("Power.R")
-            tryCatch({
-                new.output <- Power(input$n, input$k, input$rho, input$alpha)
-            }, warning = function(w) {
-                stop("Power calculation failed.")
-            }, error = function(e) {
-                stop("Power calculation failed.")
-            })
-
+            new.output <- Power(input$n, input$k, input$rho, input$alpha)
 
             ## Round output
             new.output <- round(new.output, 5)
@@ -281,7 +261,6 @@ shinyServer(function(input, output, session) {
                 new.output <- paste0("= ", new.output)
             }
 
-
             ## Format output in html
             foot <- paste0("N=", input$n, ", k=", input$k, ", &rho;=", input$rho, ", &alpha;=", input$alpha)
             new.output <- paste0("<p><b>Power</b><br>", "Power ", new.output, "<br>", foot, "<p>")
@@ -291,11 +270,9 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$k, input$rho, input$alpha, input$power)
 
-
             ## Run the test; if errors are encountered, return a generic error message
             SampleSize <- dget("SampleSize.R")
             new.output <- SampleSize(input$k, input$rho, input$alpha, input$power)
-
 
             ## Assemble output table
             new.output <- htmlTable(new.output,
