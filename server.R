@@ -106,9 +106,7 @@ shinyServer(function(input, output, session) {
 
             ## Create confidence coefficient and method input
             html_ui <- paste0(html_ui,
-                              numericInput("confidence",
-                                        "Confidence level:",
-                                        values$confidence),
+                              numericInput("confidence", "Confidence level:", values$confidence, 0, 1, 0.01),
                               radioButtons("familywise",
                                            "Familywise error control:",
                                            choices = c("None"="uncorrected",
