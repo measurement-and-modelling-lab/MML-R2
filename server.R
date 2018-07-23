@@ -55,23 +55,23 @@ shinyServer(function(input, output, session) {
         if (values$calculation == "fixedci") {
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("r", "R squared:", values$r, 0.01, 0.99, 0.01),
-                              numericInput("confidence", "Confidence level:", values$confidence, 0.6, 0.99, 0.01))
+                              numericInput("r", "R squared:", values$r, 0, 1, 0.01),
+                              numericInput("confidence", "Confidence level:", values$confidence, 0, 1, 0.01))
         } else if (values$calculation == "randomci") {
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("r", "R squared:", values$r, 0.01, 0.99, 0.01),
-                              numericInput("confidence", "Confidence level:", values$confidence, 0.6, 0.99, 0.01))
+                              numericInput("r", "R squared:", values$r, 0, 1, 0.01),
+                              numericInput("confidence", "Confidence level:", values$confidence, 0, 1, 0.01))
         } else if (values$calculation == "power") {
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("rho", "Rho squared:", values$rho, 0.01, 0.99, 0.01),
-                              numericInput("alpha", "Alpha:", values$alpha, 0.01, 0.99, 0.01))
+                              numericInput("rho", "Rho squared:", values$rho, 0, 1, 0.01),
+                              numericInput("alpha", "Alpha:", values$alpha, 0, 1, 0.01))
         } else if (values$calculation == "samplesize") {
             html_ui <- paste0(numericInput("k", "Number of variables, including criterion:", values$k, 2),
-                              numericInput("rho", "Rho squared:", values$rho, 0.01, 0.99, 0.01),
-                              numericInput("alpha", "Alpha:", values$alpha, 0.01, 0.99, 0.01),
-                              numericInput("power", "Power desired:", values$power, 0.01, 0.99, 0.01))
+                              numericInput("rho", "Rho squared:", values$rho, 0, 1, 0.01),
+                              numericInput("alpha", "Alpha:", values$alpha, 0, 1, 0.01),
+                              numericInput("power", "Power desired:", values$power, 0, 1, 0.01))
         } else if (values$calculation == "beta") {
 
             validate(need(input$datafile, "")) ## Check that data file has been uploaded
@@ -125,7 +125,8 @@ shinyServer(function(input, output, session) {
 
         } else if (values$calculation == "r2") {
 
-            validate(need(input$datafile, "")) ## Check that the data file has been uploaded
+            ## Check that the data file has been uploaded
+            validate(need(input$datafile, ""))
 
             ## Check that R can read the data file as a .csv
             tryCatch({
@@ -136,6 +137,7 @@ shinyServer(function(input, output, session) {
                 stop("There was a problem reading your .csv file.")
             })
 
+            ## Import data and save the number of variables
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
             variables <- ncol(data)
 
@@ -145,6 +147,7 @@ shinyServer(function(input, output, session) {
 
             options <- 1:variables
             names(options) <- options
+
             html_ui <- ""
 
             ## Create radio buttons for choosing the predictors
@@ -200,11 +203,11 @@ shinyServer(function(input, output, session) {
                 stop("There must be more observations than variables.")
             }
 
-            ## Convert to numeric
-            n <- as.integer(input$n)
-            k <- as.integer(input$k)
-            r <- as.numeric(input$r)
-            confidence.level <- as.numeric(input$confidence)
+            ## Remove input$
+            n <- input$n
+            k <- input$k
+            r <- input$r
+            confidence.level <- input$confidence
 
             ## Run the tests
             fixedCI <- dget("fixedCI.R")
@@ -216,7 +219,7 @@ shinyServer(function(input, output, session) {
             new.output[new.output == 1] <- "> 0.99999"
             new.output[new.output == 0] <- "< 0.00001"
 
-            
+            ## Format the output table
             new.output <- htmlTable(new.output,
                                     caption = "<b>Confidence Interval (Fixed Regressor)</b>",
                                     css.cell = "padding-left: 2em; padding-right: 2em;",
@@ -240,10 +243,10 @@ shinyServer(function(input, output, session) {
 
 
             ## Convert to numeric
-            n <- as.integer(input$n)
-            k <- as.integer(input$k)
-            r <- as.numeric(input$r)
-            confidence.level <- as.numeric(input$confidence)
+            n <- input$n
+            k <- input$k
+            r <- input$r
+            confidence.level <- input$confidence
 
             ## Run the test
             randomCI <- dget("randomCI.R")
@@ -279,10 +282,10 @@ shinyServer(function(input, output, session) {
 
 
             ## Convert to numeric
-            n <- as.integer(input$n)
-            k <- as.integer(input$k)
-            rho <- as.numeric(input$rho)
-            alpha <- as.numeric(input$alpha)
+            n <- input$n
+            k <- input$k
+            rho <- input$rho
+            alpha <- input$alpha
 
             Power <- dget("Power.R")
             new.output <- Power(n, k, rho, alpha)
@@ -315,10 +318,10 @@ shinyServer(function(input, output, session) {
 
 
             ## Convert to numeric
-            k <- as.integer(input$k)
-            rho <- as.numeric(input$rho)
-            alpha <- as.numeric(input$alpha)
-            power <- as.numeric(input$power)
+            k <- input$k
+            rho <- input$rho
+            alpha <- input$alpha
+            power <- input$power
 
             SampleSize <- dget("SampleSize.R")
             new.output <- SampleSize(k, rho, alpha, power)

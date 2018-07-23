@@ -49,7 +49,7 @@ function (N, k, RS, clevel) {
 
 
     ## Upper limit
-    while(abs((pf(Fobs,df1,df2,ncp=ncUL))-llimit)> tol ) {
+    while(abs((pf(Fobs,df1,df2,ncp=ncUL))-llimit) > tol ) {
         Pfncul <- pf(Fobs,df1,df2,ncp=ncUL)
         ncUL <- -((Pfncul-llimit)/(Pfncul -.5))*(ncUL-nc)+ncUL
         if (ncUL < 0) {
@@ -76,7 +76,8 @@ function (N, k, RS, clevel) {
         iterations <- iterations+1
         if (iterations > 1000) {
             stop("Confidence interval calculation failed.")
-        }    }
+        }
+    }
 
     plevel <- 1 - pf(Fobs, df1, N-df1-1, ncp=0)
     

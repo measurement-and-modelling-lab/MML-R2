@@ -4,7 +4,7 @@ function (k, rho, alpha, power) {
     df1 <- k - 1
     N <- 1000
     i <- 1
-    increment <- 1000 ## Special value used for bijection range finding
+    increment <- 1000 ## Special value used for bisection range finding
     count <- 0
     tol <- 0.00000001 ## Tolerance
     found <- FALSE
@@ -15,33 +15,23 @@ function (k, rho, alpha, power) {
         Fobs <- (rho/df1)/((1-rho)/(N-df1-1))
         nc <- N*(rho/(1-rho))
 
-        tryCatch({
-            qf(1-alpha,df1,df2)
-        }, warning = function(w) {
+        ## Error check
+        check <- c()
+        check[1] <- suppressWarnings(qf(1-alpha,df1,df2))
+        check[2] <- suppressWarnings(pf(check[1], df1, df2, ncp=nc))
+        if (FALSE %in% is.finite(check)) {
             stop("Sample size calculation failed.")
-        }, error = function(e) {
-            stop("Sample size calculation failed.")
-        })
+        }
 
         fcrit <- qf(1-alpha, df1, df2)
 
-        tryCatch({
-            pf(fcrit, df1, df1, ncp=nc)
-        }, warning = function(w) {
-            stop("Sample size calculation failed.")
-        }, error = function(e) {
-            stop("Sample size calculation failed.")
-        })
-        
-        powerest <- 1-pf(fcrit, df1, df1, ncp=nc) ## Power Estimate
+        powerest <- 1-pf(fcrit, df1, df2, ncp=nc) ## Power Estimate
 
         ## Modified bisection
         if (powerest > power) {
             increment <- increment/2
             N <- N-increment
-        }
-
-        else if (powerest < power) {
+        } else if (powerest < power) {
             N <- N + increment ##Increment the N estimate by increment until it goes above the original estimate
         }
 
