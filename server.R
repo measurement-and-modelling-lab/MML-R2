@@ -329,90 +329,24 @@ shinyServer(function(input, output, session) {
 
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$datafile, input$predictors, input$criterion, input$confidence, input$familywise)
-
-
-            ## Import data
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-
-
-            ## If the upper triangle of a correlation matrix is empty, make the matrix symmetric
-            ## Otherwise, check whether the matrix is symmetric and if not return an error
-            is.square <- ncol(data) == nrow(data)
-            if (is.square) {
-                current.upper.triangle <- data[upper.tri(data)]
-                symmetric.upper.triangle <- t(data)[upper.tri(t(data))]
-                if (all(is.na(current.upper.triangle))) {
-                    data[upper.tri(data)] <- symmetric.upper.triangle
-                } else if (!all(current.upper.triangle == symmetric.upper.triangle)) {
-                    stop("Correlation matrix is not symmetric.")
-                }
+            if (ncol(data) == nrow(data)) {
+                validate(need(input$n, ""))
             }
 
+            ## Run the test
+            Beta <- dget("Beta.R")
+            new.output <- Beta(data, input$n, input$criterion, input$predictors, input$familywise, input$confidence)
 
-            ## Error checking
-            areBetween0And1(input$confidence)
-            if (as.character(input$criterion) %in% input$predictors) {
-                stop("A variable cannot be both a predictor and the criterion.")
-            }
-            if (length(input$predictors) < 2) {
-                stop("You must have at least two predictors.")
-            }
-            if (NA %in% as.numeric(data)) {
-                stop("Your data has missing or non-numeric elements.")
-            }
-
-
-            ## If covariance or correlation data, import N
-            ## If raw data derive N
-            if (is.square) {
-                validate(need(input$datafile, ""))
-                areIntegers(input$n)
-                N <- as.numeric(input$n)
-            } else {
-                N <- nrow(data)
-                data <- cov(data)
-            }
-
-            
-            ## Import other variables
-            predictors <- as.numeric(input$predictors)
-            criterion <- as.numeric(input$criterion)
-            familywise <- input$familywise
-            cx <- data[predictors, predictors]
-            cxy <- data[predictors, criterion]
-            vy <- data[criterion, criterion]
-            alpha <- 1 - as.numeric(input$confidence)
-
-            
-            ## Run the test; if errors are encountered, return a generic error message
-            tryCatch({
-                Beta <- dget("Beta.R")
-                new.output <- Beta(cx, cxy, vy, N, alpha, familywise)
-            }, warning = function(w) {
-                stop("Standardised beta calculation failed.")
-            }, error = function(e) {
-                stop("Standardised beta calculation failed.")
-            })
-
-
-            ## Round output
-            new.output <- round(new.output, 5)
-            new.output[new.output==0] <- "< 0.00001"
-            new.output[new.output==1] <- "> 0.99999"
-
-
-            ## Assemble output table
-            familywise.labels <- list("uncorrected"="Uncontrolled",
-                                      "bonferroni"="Bonferroni",
-                                      "sidak"="Dunn-Sidak",
-                                      "stepdown_bonferroni"="Stepdown Bonferroni",
-                                      "stepdown_sidak"="Stepdown Dunn-Sidak")
-            FW <- familywise.labels[[familywise]]
+            ## Format output table
+            FW <- c("None", "Bonferroni", "Dunn-Sidak", "Stepdown Bonferroni", "Stepdown Dunn-Sidak")
+            names(FW) <- c("uncorrected", "bonferroni", "sidak", "stepdown_bonferroni", "stepdown_sidak")
+            FW <- FW[[input$familywise]]
             new.output <- htmlTable(new.output,
                                     css.cell = "padding-left: .5em; padding-right: .5em;",
                                     caption = "<b>Standardized Beta Coefficients</b>",
                                     cgroup = c("Estimates", ""),
-                                    tfoot = paste0("Y=",criterion,", X=",paste(predictors, collapse=","), ", 1-&alpha;=", 1-alpha, ", FW=", FW),
+                                    tfoot = paste0("Y=",input$criterion,", X=",paste(input$predictors, collapse=","), ", 1-&alpha;=", 1-input$alpha, ", FW=", FW),
                                     n.cgroup = c(3,4))
 
         } else if (input$calculation == "r2") {

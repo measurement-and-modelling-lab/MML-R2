@@ -1,4 +1,48 @@
-function(cx, cxy, vy, N, alpha, familywise) {
+function(data, N, criterion, predictors, familywise, confidence) {
+
+    source("errorcheck.R")
+
+    is.square <- ncol(data) == nrow(data)
+
+    ## If the upper triangle of a correlation or covariance matrix is empty, make the matrix symmetric
+    ## Otherwise, check whether the matrix is symmetric and if not return an error
+    if (is.square) {
+        current.upper.triangle <- data[upper.tri(data)]
+        symmetric.upper.triangle <- t(data)[upper.tri(t(data))]
+        if (all(is.na(current.upper.triangle))) {
+            data[upper.tri(data)] <- symmetric.upper.triangle
+        } else if (!all(current.upper.triangle == symmetric.upper.triangle)) {
+            stop("Correlation or covariance matrix is not symmetric.")
+        }
+    }
+
+    if (NA %in% as.numeric(data)) {
+        stop("Your data has missing or non-numeric elements.")
+    }
+
+    if (!is.square) {
+        N <- nrow(data)
+        data <- cor(data)
+    }
+
+    areIntegers(N)
+    areBetween0And1(confidence)
+    if (criterion %in% predictors) {
+        stop("A variable cannot be both a predictor and the criterion.")
+    }
+    if (length(predictors) < 2) {
+        stop("You must have at least two predictors.")
+    }
+    
+
+    ## Import other variables
+    predictors <- as.numeric(predictors)
+    criterion <- as.numeric(criterion)
+    cx <- data[predictors, predictors]
+    cxy <- data[predictors, criterion]
+    vy <- data[criterion, criterion]
+    alpha <- 1 - as.numeric(confidence)
+    
 
     ## Extract the lower triangle and main diagonal from a matrix as a vector
     vech <- function(x) {
@@ -153,7 +197,7 @@ function(cx, cxy, vy, N, alpha, familywise) {
 
     tc <- qt(alpha/2, N-p-1, lower = F)
 
-    ## Error check
+    ## Error check on confidence interval
     if (FALSE %in% is.finite(tc)) {
         stop("Confidence interval calculation failed.")
     }
@@ -162,12 +206,17 @@ function(cx, cxy, vy, N, alpha, familywise) {
 	CIs[i,] <- c(beta[i] - tc[i] * DELse[i], beta[i], beta[i] + tc[i] * DELse[i])
     }
 
-
-
     ## Assemble output
     output <- cbind(CIs, DELse, test.statistic, p.values, alpha)
     rownames(output) <- paste("<b>&beta;<sub>", 1:p, '</sub></b>', sep='')
     colnames(output) <- c("Lower", "Point", "Upper", "Std. Error", paste0("t<sub>", N-p-1, "</sub>"), "p", "&alpha;")
+
+
+    ## Round output
+    output <- round(output, 5)
+    output[output==0] <- "< 0.00001"
+    output[output==1] <- "> 0.99999"
+
 
     return(output)
 }
