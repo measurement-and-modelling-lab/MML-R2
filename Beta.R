@@ -6,7 +6,6 @@ function(data, N, criterion, predictors, familywise, confidence) {
     ## familywise is a string indicating the method of controlling familywise error control
     ## confidence is the confidence level for the confidence interval
 
-
     source("errorcheck.R")
 
     is.square <- ncol(data) == nrow(data)

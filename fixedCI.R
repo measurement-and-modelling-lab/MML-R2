@@ -1,97 +1,62 @@
-function (N, k, RS, clevel) {
-    ## n is sample size
-    ## k is the number of variables
-    ## Rsq is the squared multiple correlation
-    ## conlev is the confidence level
-    
-    ## Error checking
-    areShort(N, k, RS, clevel)
-    areIntegers(N, k)
-    areBetween0And1(RS, clevel)
-    if (k < 2) {
-        stop("There must be at least two variables.")
-    }
-    if (N <= k) {
-        stop("There must be more observations than variables.")
-    }
+function (N, k, R2, confidence) {
 
-    llimit <- (1-clevel)/2
-    ulimit <- clevel + llimit
-
-    df1 <- k-1
+    percentile.lower <- (1 - confidence) / 2
+    percentile.upper <- confidence + percentile.lower
+    df1 <- k - 1
     df2 <- N - df1 - 1
-    adjRS <- 1- ((1-RS)*(N-1))/df2
-    Fobs <- (RS/df1)/((1-RS)/(df2))
-    adjRS = 1- ((1-RS)*(N-1))/df2
-    nc <- N*(adjRS/(1-adjRS))
+    adjR2 <- 1 - ((1 - R2) * (N - 1)) / df2
+    ncp.initial <- N * (adjR2 / (1 - adjR2)) ## noncentrality parameter
+    Fobs <- (R2 / df1) / ((1 - R2) / df2)
+    tolerance <- 0.000000001
 
-    tol <- 0.00000001
+    ncpCalc <- function (percentile1, percentile2, df1, df2, ncp.initial, N) {
 
+        F.quartile <- qf(percentile1, df1, df2, ncp.initial)              ## calculate the F quartile for the lower percentile, for the initial ncp
+        R2.limit <- (F.quartile / df2) / ((1 / df1) + (F.quartile / df2)) ## calculate the limit based on the the F quartile
+        ncp.new <- N * (R2.limit / (1 - R2.limit))                        ## recalculate ncp using R2.limit
+        density <- pf(Fobs, df1, df2, ncp.new)                            ## calculate the percentage of the F distribution to the left of ncp.new
+        density.difference <- abs(density - percentile2)                  ## calculate the difference between that percentage and the upper percentile
 
-    ## Lower limit
-    FLL <- qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE)
-    RSLL <- (FLL/df2)/((1/df1)+(FLL/df2))
-    ncLL <- N*(RSLL/(1-RSLL))
-    iterations <- 0
-    while(abs((pf(Fobs,df1,df2,ncp=ncLL))-ulimit) > tol ) {
-        Pfncll <- pf(Fobs,df1,df2,ncp=ncLL)
-        ncLL <- -((Pfncll-ulimit)/(Pfncll -.5))*(ncLL-nc)+ncLL
-        if (ncLL < 0) { ## Should it return an error in this case?
-            ncLL <- 0
-            break
+        while (density.difference > tolerance) { ## repeat the calculation until the difference is very small
+            density.new <- pf(Fobs, df1, df2, ncp.new)
+            ncp.new <- -((density.new - percentile2) / (density.new - 0.5)) * (ncp.new - ncp.initial) + ncp.new
+            density.difference <- abs(density.new - percentile2)
+
+            if (ncp.new < 0) {
+                ncp.new <- 0
+                break
+            }
+            
         }
-        iterations <- iterations+1
-        if (iterations > 1000) {
-            stop("Confidence interval calculation failed.")
-        }
+
+        R2.limit <- ncp.new / (ncp.new + N)
+
+        return(R2.limit)
+
     }
 
+    ## Calculate lower limit
+    lower.limit <- ncpCalc(percentile.lower, percentile.upper, df1, df2, ncp.initial, N)
 
-    ## Upper limit
-    FUL <- qf(ulimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE)
-    RSUL <- (FUL/df2)/((1/df1)+(FUL/df2))
-    ncUL <- N*(RSUL/(1-RSUL))
-    iterations <- 0
-    while(abs((pf(Fobs,df1,df2,ncp=ncUL))-llimit) > tol ) {
-        Pfncul <- pf(Fobs,df1,df2,ncp=ncUL)
-        ncUL <- -((Pfncul-llimit)/(Pfncul -.5))*(ncUL-nc)+ncUL
-        if (ncUL < 0 || iterations > 1000) {
-            stop("Confidence interval calculation failed.")
-        }
-    }
+    ## Calculate upper limit
+    upper.limit <- ncpCalc(percentile.upper, percentile.lower, df1, df2, ncp.initial, N)
 
+    ## Calculate lower bound
+    confidence <- confidence - (1 - confidence)
+    percentile.upper <- 1 - ((1 - confidence) / 2)
+    percentile.lower <- (1 - confidence) / 2
+    lower.bound <- ncpCalc(percentile.lower, percentile.upper, df1, df2, ncp.initial, N)
 
-    ## Lower bound
-    clevel2 <- clevel - (1-clevel)
-    ulimit <- 1-((1-clevel2)/2)
-    llimit <- (1-clevel2)/2
-    FLB <- qf(llimit,df1,df2,ncp = nc,lower.tail = TRUE,log.p = FALSE)
-    RSLB <- (FLB/df2)/((1/df1)+(FLB/df2))
-    ncLB <- N*(RSLB/(1-RSLB))
-    iterations <- 0
-    while(abs((pf(Fobs,df1,df2,ncp=ncLB))-ulimit)> tol ) {
-        Pfnclb <- pf(Fobs,df1,df2,ncp=ncLB)
-        ncLB <- -((Pfnclb-ulimit)/(Pfnclb -.5))*(ncLB-nc)+ncLB
-        if (ncLB < 0) {
-            ncLB <- 0
-            break
-        }
-        iterations <- iterations+1
-        if (iterations > 1000) {
-            stop("Confidence interval calculation failed.")
-        }
-    }
+    ## Calculate p level
+    plevel <- 1 - pf(Fobs, df1, df2, ncp=0)
 
-    plevel <- 1 - pf(Fobs, df1, N-df1-1, ncp=0)
+    ## Format output
+    output.matrix <- matrix(c(lower.limit, upper.limit, lower.bound, plevel), nrow=1)
+    colnames(output.matrix) <- c('Lower Limit', 'Upper Limit', 'Lower Bound', 'Plevel')
+    output.matrix <- round(output.matrix, 5)
+    output.matrix[output.matrix == 1] <- "> 0.99999"
+    output.matrix[output.matrix == 0] <- "< 0.00001"
 
-    ## Assemble output matrix
-    output.table <- matrix(c(RSLL, RSUL, RSLB, plevel), nrow=1, ncol=4)
-    colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound', 'Plevel')
+    return(output.matrix)
 
-    ## Round output matrix
-    output.table <- round(output.table, 5)
-    output.table[output.table == 1] <- "> 0.99999"
-    output.table[output.table == 0] <- "< 0.00001"
-
-    return(output.table)
 }
