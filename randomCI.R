@@ -1,4 +1,8 @@
 function (n, k, Rsq, conlev) {
+    ## n is sample size
+    ## k is the number of variables
+    ## Rsq is the squared multiple correlation
+    ## conlev is the confidence level
 
     ##Implementation based off the paper "Towards using confidence intervals to compare correlations" (Zou, 2007)
     

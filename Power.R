@@ -1,4 +1,8 @@
 function(N, k, rho, alpha, round){
+    ## N is sample size
+    ## k is the number of variables
+    ## alpha is the type I error rate
+    ## round is a logical indicating whether to round the output
 
     ## Error checking
     source("errorcheck.R")
@@ -17,7 +21,7 @@ function(N, k, rho, alpha, round){
     Fobs <- (rho/df1)/((1-rho)/(N-df1-1))
     nc = N*(rho/(1-rho))
 
-    ## Error check
+    ## More error checking
     check <- c()
     check[1] <- suppressWarnings(qf(1-alpha,df1,df2))
     check[2] <- suppressWarnings(pf(check[1], df1, df2, ncp=nc))
@@ -29,7 +33,7 @@ function(N, k, rho, alpha, round){
     power <- 1-pf(fcrit,df1,df1,ncp=nc)
 
 
-    ## Round output
+    ## Round output if requested
     if (round) {
         power <- round(power, 5)
         if (power == 1) {

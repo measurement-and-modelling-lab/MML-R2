@@ -1,4 +1,8 @@
 function (N, k, RS, clevel) {
+    ## n is sample size
+    ## k is the number of variables
+    ## Rsq is the squared multiple correlation
+    ## conlev is the confidence level
     
     ## Error checking
     areShort(N, k, RS, clevel)

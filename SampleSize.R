@@ -1,4 +1,8 @@
 function (k, rho, alpha, power) {
+    ## k is the number of variables
+    ## rho is the population correlation value
+    ## alpha is the type I error rate
+    ## power is the desired power
 
     source("errorcheck.R")
     

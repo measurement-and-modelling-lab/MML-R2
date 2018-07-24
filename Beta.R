@@ -1,4 +1,11 @@
 function(data, N, criterion, predictors, familywise, confidence) {
+    ## data is a covariance, correlation or raw data matrix
+    ## N is the sample size
+    ## criterion is a single number corresponding to a column of X to use as the criterion
+    ## predictors is a vector of numbers corresponding to two or more columns of X to use as predictors
+    ## familywise is a string indicating the method of controlling familywise error control
+    ## confidence is the confidence level for the confidence interval
+
 
     source("errorcheck.R")
 

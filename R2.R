@@ -1,4 +1,7 @@
 function (data, X, Y) {
+    ## data is a raw, correlation, or covariance matrix
+    ## X is a vector of numbers corresponding to two or more columns of X to use as predictors
+    ## Y is a single number corresponding to a column of X to use as the criterion
 
     ## If the upper triangle of a correlation matrix is empty, make the matrix symmetric
     ## Otherwise, check whether the matrix is symmetric and if not return an error

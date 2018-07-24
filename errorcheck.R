@@ -1,12 +1,3 @@
-## Simultaneously require that several input$ variables exist before moving on
-massValidateNeed <- function(...) {
-    arguments <- list(...)
-    for (a in arguments) {
-        validate(need(a, ""))
-    }
-}
-
-
 ## Check that the input doesn't have too many digits
 areShort <- function(...) {
     arguments <- list(...)
@@ -17,7 +8,6 @@ areShort <- function(...) {
     }
 }
 
-
 ## Determine whether several inputs are integers
 areIntegers <- function(...) {
     arguments <- list(...)
@@ -27,7 +17,6 @@ areIntegers <- function(...) {
         }
     }
 }
-
 
 ## Determine whether a number is between 0 and 1 inclusive
 areBetween0And1 <- function(...) {

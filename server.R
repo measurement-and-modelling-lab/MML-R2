@@ -7,6 +7,15 @@ require(htmlTable) || install.packages(htmlTable)
 shinyServer(function(input, output, session) {
 
 
+    ## Simultaneously require that several input$ variables exist before moving on
+    massValidateNeed <- function(...) {
+        arguments <- list(...)
+        for (a in arguments) {
+            validate(need(a, ""))
+        }
+    }
+
+
     ## Global values
     values <- reactiveValues()
     values$n <- ""
@@ -31,6 +40,7 @@ shinyServer(function(input, output, session) {
 
     ## If calculation is changed, send current widget values to global, then update global calculation value to whatever calculator it's changing to
     observeEvent(input$calculation, {
+
         values$n <- input$n
         values$k <- input$k
         values$r <- input$r
@@ -42,13 +52,15 @@ shinyServer(function(input, output, session) {
         values$calculation <- input$calculation
         values$predictors <- input$predictors
         values$criterion <- input$criterion
+
     })
 
+
+    ## Create input widgets, pulling default values from global
     output$valueInput <- renderUI({
 
         validate(need(input$calculation, ""))
 
-        ## Create input widgets, pulling default values from global
         html_ui <- ""
         if (values$calculation == "fixedci") {
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
@@ -139,6 +151,7 @@ shinyServer(function(input, output, session) {
     })
 
 
+    ## Run tests when run button is pressed
     R2 <- eventReactive(input$runButton, {
 
         if (input$calculation == "fixedci") {
@@ -259,6 +272,8 @@ shinyServer(function(input, output, session) {
 
     })
 
+
+    ## Get values from R2() then send output to ui.R
     output$finaloutput <- renderUI({
         R2()
     })
