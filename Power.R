@@ -1,14 +1,14 @@
-function(N, k, rho, alpha){
+function(N, k, rho, alpha, round){
 
     ## Error checking
     source("errorcheck.R")
-    areShort(input$n, input$k, input$rho, input$alpha)
-    areIntegers(input$n, input$k)
-    areBetween0And1(input$rho, input$alpha)
-    if (input$k < 2) {
+    areShort(N, k, rho, alpha)
+    areIntegers(N, k)
+    areBetween0And1(rho, alpha)
+    if (k < 2) {
         stop("There must be at least two variables!")
     }
-    if (input$n <= input$k) {
+    if (N <= k) {
         stop("There must be more observations than variables.")
     }
 
@@ -27,6 +27,19 @@ function(N, k, rho, alpha){
     
     fcrit <- qf(1-alpha,df1,df2)
     power <- 1-pf(fcrit,df1,df1,ncp=nc)
+
+
+    ## Round output
+    if (round) {
+        power <- round(power, 5)
+        if (power == 1) {
+            power <- "> 0.99999"
+        } else if (power == 0) {
+            power <- "< 0.00001"
+        } else {
+            power <- paste0("= ", power)
+        }
+    }
 
     return(power)
 }

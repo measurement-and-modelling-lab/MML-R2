@@ -1,6 +1,18 @@
 function (n, k, Rsq, conlev) {
 
     ##Implementation based off the paper "Towards using confidence intervals to compare correlations" (Zou, 2007)
+    
+    ## Error checking
+    source("errorcheck.R")
+    areShort(n, k, Rsq, conlev)
+    areIntegers(n, k)
+    areBetween0And1(Rsq, conlev)
+    if (k < 2) {
+        stop("There must be at least two variables!")
+    }
+    if (n <= k) {
+        stop("There must be more observations than variables.")
+    }
 
     Bisection <- function (n, k, Rsq, conlev) {
 
@@ -12,6 +24,10 @@ function (n, k, Rsq, conlev) {
         Rsqtilde <- Rsq/(1-Rsq)
 
         check <- pf(df2*Rsqtilde/k,k,df2)
+
+        if (!is.finite(check)) {
+            stop("Confidence interval calculation failed.")
+        }
 
         if (check <= pul) {
             lower = NULL
@@ -55,7 +71,11 @@ function (n, k, Rsq, conlev) {
                             nu <- (phi2-2*yy*gamma*(sqrt(df1*df2)))/g**2
                             lambdau <- yy*gamma*(sqrt(df1*df2))/g**2
                             limit<- df2*Rsqtilde/(nu*g)
+
                             diff <- pf(limit,nu,df2,lambdau)-criterion
+                            if (!is.finite(diff)) {
+                                stop("Confidence interval calculation failed.")
+                            }
                             
                             if (root == 1){
                                 diff3 <- diff
@@ -89,15 +109,22 @@ function (n, k, Rsq, conlev) {
         return(c(lower, upper))
     }
 
-    output1 <- Bisection(n, k, Rsq, conlev)
-    upper <- output1[2]
-    lower <- output1[1]
+    bisection.output <- Bisection(n, k, Rsq, conlev)
+    upper <- bisection.output[2]
+    lower <- bisection.output[1]
     lbound <- Bisection(n, k, Rsq,  conlev-(1-conlev))[1]
 
 
     ## Format input matrix
     output.table <- matrix(c(lower, upper, lbound), nrow=1, ncol=3)
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound')
+
+    
+    ## Round output
+    output.table <- round(output.table, 5)
+    output.table[output.table == 1] <- "> 0.99999"
+    output.table[output.table == 0] <- "< 0.00001"
+
 
     return(output.table)
 

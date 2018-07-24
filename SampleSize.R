@@ -34,8 +34,7 @@ function (k, rho, alpha, power) {
         }
 
         fcrit <- qf(1-alpha, df1, df2)
-
-        powerest <- 1-pf(fcrit, df1, df2, ncp=nc) ## Power Estimate
+        powerest <- 1-pf(fcrit, df1, df2, ncp=nc)
 
         ## Modified bisection
         if (powerest > power) {
@@ -61,8 +60,8 @@ function (k, rho, alpha, power) {
 
     ## Calculate power using the lower N and the higher N
     Power <- dget("Power.R")
-    powerlow <- Power(Nlow,k,rho,alpha)
-    powerhigh <- Power(Nhigh,k,rho,alpha)
+    powerlow <- Power(Nlow,k,rho,alpha, FALSE)
+    powerhigh <- Power(Nhigh,k,rho,alpha, FALSE)
 
 
     ## Assemble output matrix
@@ -72,7 +71,6 @@ function (k, rho, alpha, power) {
     colnames(output.table) <- c(rowname1, rowname2)
     rownames(output.table) <- "<b>Power</b>"
 
-    
     ## Round output
     output.table <- round(output.table, 5)
     output.table[output.table == 1] <- "> 0.99999"

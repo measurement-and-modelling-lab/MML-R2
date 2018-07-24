@@ -34,7 +34,15 @@ th {
 
   sidebarLayout(
       sidebarPanel(
-          uiOutput("selector"), ## Radio buttons for choosing a calculation to run
+          radioButtons("calculation",
+                       "Calculation to run:",
+                       choiceNames = list(HTML("Confidence interval on R<sup>2</sup> (fixed regressor)"),
+                                          HTML("Confidence interval on R<sup>2</sup> (random regressor)"),
+                                          HTML("Power to reject R<sup>2</sup> = 0"),
+                                          HTML("Sample size to reject R<sup>2</sup> = 0"),
+                                          "Standardized regression coefficients",
+                                          HTML("Calculate R<sup>2</sup> from raw data")),
+                       choiceValues = list("fixedci", "randomci", "power", "samplesize", "beta", "r2")),
           HTML("<hr>"),
           conditionalPanel(condition = "input.calculation == 'r2' | input.calculation == 'beta'",
                            fileInput("datafile", "Data:")),

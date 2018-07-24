@@ -1,4 +1,15 @@
 function (N, k, RS, clevel) {
+    
+    ## Error checking
+    areShort(N, k, RS, clevel)
+    areIntegers(N, k)
+    areBetween0And1(RS, clevel)
+    if (k < 2) {
+        stop("There must be at least two variables.")
+    }
+    if (N <= k) {
+        stop("There must be more observations than variables.")
+    }
 
     llimit <- (1-clevel)/2
     ulimit <- clevel + llimit
@@ -69,8 +80,14 @@ function (N, k, RS, clevel) {
 
     plevel <- 1 - pf(Fobs, df1, N-df1-1, ncp=0)
 
+    ## Assemble output matrix
     output.table <- matrix(c(RSLL, RSUL, RSLB, plevel), nrow=1, ncol=4)
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound', 'Plevel')
+
+    ## Round output matrix
+    output.table <- round(output.table, 5)
+    output.table[output.table == 1] <- "> 0.99999"
+    output.table[output.table == 0] <- "< 0.00001"
 
     return(output.table)
 }
