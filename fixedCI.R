@@ -11,9 +11,9 @@ function (N, k, R2, confidence) {
 
 
     ## Error checking
-    areShort(N, k, RS, clevel)
+    areShort(N, k, R2, confidence)
     areIntegers(N, k)
-    areBetween0And1(RS, clevel)
+    areBetween0And1(R2, confidence)
 
     if (k < 2) {
         stop("There must be at least two variables.")
