@@ -158,14 +158,8 @@ shinyServer(function(input, output, session) {
             massValidateNeed(input$n, input$k, input$r, input$confidence)
 
             ## Run the test; if errors are encountered, return a generic error message
-            tryCatch({
                 fixedCI <- dget("fixedCI.R")
                 new.output <- fixedCI(input$n, input$k, input$r, input$confidence)
-            }, warning = function(w) {
-                stop("Confidence interval calculation failed.")
-            }, error = function(e) {
-                stop("Confidence interval calculation failed.")
-            })
 
             ## Format the output table
             new.output <- htmlTable(new.output,
