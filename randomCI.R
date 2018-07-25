@@ -7,6 +7,7 @@ function (n, k, Rsq, conlev) {
     ## Import functions
     source("errorcheck.R")
     Bisection <- dget("Bisection.R")
+    SensibleRounding <- dget("SensibleRounding.R")
 
     ## Error checking
     areShort(n, k, Rsq, conlev)
@@ -30,9 +31,7 @@ function (n, k, Rsq, conlev) {
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound')
     
     ## Round output
-    output.table <- round(output.table, 5)
-    output.table[output.table == 1] <- "> 0.99999"
-    output.table[output.table == 0] <- "< 0.00001"
+    output.table <- SensibleRounding(output.table, 5)
 
     return(output.table)
 

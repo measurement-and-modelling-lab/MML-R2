@@ -8,7 +8,7 @@ function (N, k, R2, confidence) {
     ## Import functions
     source("errorcheck.R")
     limitCalc <- dget("limitCalc.R")
-
+    SensibleRounding <- dget("SensibleRounding.R")
 
     ## Error checking
     areShort(N, k, R2, confidence)
@@ -50,9 +50,7 @@ function (N, k, R2, confidence) {
     ## Format output
     output.matrix <- matrix(c(lower.limit, upper.limit, lower.bound, plevel), nrow=1)
     colnames(output.matrix) <- c('Lower Limit', 'Upper Limit', 'Lower Bound', 'Plevel')
-    output.matrix <- round(output.matrix, 5)
-    output.matrix[output.matrix == 1] <- "> 0.99999"
-    output.matrix[output.matrix == 0] <- "< 0.00001"
+    output.matrix <- SensibleRounding(output.matrix, 5)
 
 
     return(output.matrix)

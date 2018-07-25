@@ -6,29 +6,41 @@ function(data, N, criterion, predictors, familywise, confidence) {
     ## familywise is a string indicating the method of controlling familywise error control
     ## confidence is the confidence level for the confidence interval
 
+    ## Import functions
     source("errorcheck.R")
+    SensibleRounding <- dget("SensibleRounding.R")
 
     is.square <- ncol(data) == nrow(data)
 
-    ## If the upper triangle of a correlation or covariance matrix is empty, make the matrix symmetric
+    ## If the upper triangle of a correlation matrix is empty, make the matrix symmetric
     ## Otherwise, check whether the matrix is symmetric and if not return an error
+    is.square <- ncol(data) == nrow(data)
     if (is.square) {
         current.upper.triangle <- data[upper.tri(data)]
         symmetric.upper.triangle <- t(data)[upper.tri(t(data))]
         if (all(is.na(current.upper.triangle))) {
             data[upper.tri(data)] <- symmetric.upper.triangle
         } else if (!all(current.upper.triangle == symmetric.upper.triangle)) {
-            stop("Correlation or covariance matrix is not symmetric.")
+            stop("Correlation/covariance matrix is not symmetric.")
         }
+    } else {
+        N <- nrow(data)
+        data <- cor(data)
+    }
+
+    ## If the matrix is a covariance matrix, convert it
+    if (FALSE %in% (diag(data) == 1)) {
+        data <- cov2cor(data)
+    }
+
+    ## Check that the correlation matrix is positive definite
+    eigen.values <- eigen(data)[[1]]
+    if (TRUE %in% (eigen.values <= 0)) {
+        stop('Data matrix is not positive definite.')
     }
 
     if (NA %in% as.numeric(data)) {
         stop("Your data has missing or non-numeric elements.")
-    }
-
-    if (!is.square) {
-        N <- nrow(data)
-        data <- cor(data)
     }
 
     areIntegers(N)
@@ -219,10 +231,7 @@ function(data, N, criterion, predictors, familywise, confidence) {
 
 
     ## Round output
-    output <- round(output, 5)
-    output[output==0] <- "< 0.00001"
-    output[output==1] <- "> 0.99999"
-
+    output <- SensibleRounding(output, 5)
 
     return(output)
 }

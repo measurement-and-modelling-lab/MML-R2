@@ -3,6 +3,9 @@ function (data, X, Y) {
     ## X is a vector of numbers corresponding to two or more columns of X to use as predictors
     ## Y is a single number corresponding to a column of X to use as the criterion
 
+    ## Import functions
+    SensibleRounding <- dget("SensibleRounding.R")
+
     ## If the upper triangle of a correlation matrix is empty, make the matrix symmetric
     ## Otherwise, check whether the matrix is symmetric and if not return an error
     is.square <- ncol(data) == nrow(data)
@@ -43,14 +46,7 @@ function (data, X, Y) {
     R2 <- t(b) %*% Rxy
 
     ## Round output
-    R2 <- round(R2, 5)
-    if (R2 == 1) {
-        R2 <- "> 0.99999"
-    } else if (R2 == 0) {
-        R2 <- "< 0.00001"
-    } else {
-        R2 <- paste0("= ", R2)
-    }
+    R2 <- PrettyRounding(R2, 5)
 
     return(R2)
 }

@@ -6,6 +6,7 @@ function (k, rho, alpha, power.desired) {
 
     ## Import functions
     Power <- dget("Power.R")
+    SensibleRounding <- dget("SensibleRounding.R")
     source("errorcheck.R")
     
     ## Check for errors
@@ -28,17 +29,14 @@ function (k, rho, alpha, power.desired) {
 
         ## Modified bisection
         if (power.estimated > power.desired) {
-            print("1")
             increment <- increment/2
             N <- N-increment
         } else if (power.estimated < power.desired) {
-            print("2")
             N <- N + increment ## Increment the N estimate by increment until it goes above the original estimate
         } else {
             break
         }
 
-        print("3")
         power.difference <- abs(power.estimated - power.desired)
 
         iteration <- iteration + 1
@@ -64,9 +62,7 @@ function (k, rho, alpha, power.desired) {
     rownames(output.table) <- "<b>Power</b>"
 
     ## Round output
-    output.table <- round(output.table, 5)
-    output.table[output.table == 1] <- "> 0.99999"
-    output.table[output.table == 0] <- "< 0.00001"
+    output.table <- SensibleRounding(output.table, 5)
 
     return(output.table)
 }

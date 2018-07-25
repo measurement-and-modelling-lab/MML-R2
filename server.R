@@ -192,6 +192,7 @@ shinyServer(function(input, output, session) {
             areBetween0And1(input$rho, input$alpha)
             if (input$k < 2) stop("There must be at least two variables!")
             if (input$n <= input$k) stop("There must be more observations than variables.")
+            if (input$rho == 0) stop("The squared multiple correlation can't be zero under the alternative hypothesis.")
 
             ## Run the calculation
             new.output <- Power(input$n, input$k, input$rho, input$alpha, TRUE)
