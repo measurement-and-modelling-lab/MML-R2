@@ -7,7 +7,7 @@ function(N, k, rho, alpha, round){
     ## Derive key values from parameters
     df1 <- k - 1
     df2 = N - df1 - 1
-    Fobs <- (rho / df1)/((1 - rho)/(N - df1 - 1))
+    Fobs <- (rho / df1) / ((1 - rho)/(N - df1 - 1))
     ncp = N * (rho / (1 - rho)) ## noncentrality parameter
 
     ## Calculate fcrit and power; if either fails, return a clean error message

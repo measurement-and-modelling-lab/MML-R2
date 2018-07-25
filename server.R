@@ -86,13 +86,9 @@ shinyServer(function(input, output, session) {
             validate(need(input$datafile, ""))
 
             ## Error checking and data import
-            tryCatch({
-                data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-            }, warning = function(w) {
-                stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
-            }, error = function(e) {
-                stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
-            })
+            tryCatch(data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=",")),
+                     warning = function(w) stop("There was a problem reading your .csv file; you may need to add a line break at the end of the file."),
+                     error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
 
             if (ncol(data) > 16) {
                 stop("You cannot have more than 16 variables.")
@@ -123,18 +119,16 @@ shinyServer(function(input, output, session) {
             ## Check that the data file has been uploaded
             validate(need(input$datafile, ""))
 
-            ## Error checking / data import
-            tryCatch({
-                data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
-            }, warning = function(w) {
-                stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
-            }, error = function(e) {
-                stop("There was a problem reading one of your .csv files. You may need to add a blank line to the end of the file.")
-            })
+            
+            ## Error checking and data import
+            tryCatch(data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=",")),
+                     warning = function(w) stop("There was a problem reading your .csv file; you may need to add a line break at the end of the file."),
+                     error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
 
             if (ncol(data) > 16) {
                 stop("You cannot have more than 16 variables.")
             }
+
 
             ## Create radio buttons for choosing the criterion and predictors
             options <- 1:ncol(data)
@@ -187,21 +181,19 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$n, input$k, input$rho, input$alpha)
 
+            ## Import functions
+            source("errorcheck.R")
+            Power <- dget("Power.R")
+
             ## Error checking
             ## Necessary to do this here since Power.R is called by SampleSize.R
-            source("errorcheck.R")
             areShort(input$k, input$rho, input$alpha)
             areIntegers(input$n, input$k)
             areBetween0And1(input$rho, input$alpha)
-            if (input$k < 2) {
-                stop("There must be at least two variables!")
-            }
-            if (input$n <= input$k) {
-                stop("There must be more observations than variables.")
-            }
+            if (input$k < 2) stop("There must be at least two variables!")
+            if (input$n <= input$k) stop("There must be more observations than variables.")
 
             ## Run the calculation
-            Power <- dget("Power.R")
             new.output <- Power(input$n, input$k, input$rho, input$alpha, TRUE)
 
             ## Format output in html

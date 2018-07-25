@@ -7,7 +7,7 @@ function (N, k, R2, confidence) {
 
     ## Import functions
     source("errorcheck.R")
-    ncpCalc <- dget("ncpCalc.R")
+    limitCalc <- dget("limitCalc.R")
 
 
     ## Error checking
@@ -29,18 +29,18 @@ function (N, k, R2, confidence) {
 
 
     ## Calculate the lower limit
-    lower.limit <- ncpCalc(percentile.lower, percentile.upper, df1, df2, ncp.initial, N, Fobs)
+    lower.limit <- limitCalc(percentile.lower, percentile.upper, df1, df2, ncp.initial, N, Fobs)
 
 
     ## Calculate the upper limit
-    upper.limit <- ncpCalc(percentile.upper, percentile.lower, df1, df2, ncp.initial, N, Fobs)
+    upper.limit <- limitCalc(percentile.upper, percentile.lower, df1, df2, ncp.initial, N, Fobs)
 
 
     ## Calculate the lower bound
     confidence <- confidence - (1 - confidence)
     percentile.upper <- 1 - ((1 - confidence) / 2)
     percentile.lower <- (1 - confidence) / 2
-    lower.bound <- ncpCalc(percentile.lower, percentile.upper, df1, df2, ncp.initial, N, Fobs)
+    lower.bound <- limitCalc(percentile.lower, percentile.upper, df1, df2, ncp.initial, N, Fobs)
 
     ## Calculate the p level
     plevel <- 1 - pf(Fobs, df1, df2, ncp=0)
