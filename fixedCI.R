@@ -15,7 +15,7 @@ function (N, k, R2, confidence) {
     areIntegers(N, k)
     areBetween0And1(R2, confidence)
     if (k < 2)  stop("There must be at least two variables.")
-    if (N <= k) stop("There must be more observations than variables.")
+    if (N <= k) stop("The sample size must be greater than the number of variables.")
 
 
     ## Derive inputs
@@ -41,6 +41,7 @@ function (N, k, R2, confidence) {
     percentile.upper <- 1 - ((1 - confidence) / 2)
     percentile.lower <- (1 - confidence) / 2
     lower.bound <- limitCalc(percentile.lower, percentile.upper, df1, df2, ncp.initial, N, Fobs)
+
 
     ## Calculate the p level
     plevel <- 1 - pf(Fobs, df1, df2, ncp=0)

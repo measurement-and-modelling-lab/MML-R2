@@ -198,7 +198,7 @@ shinyServer(function(input, output, session) {
 
             ## Format output in html
             foot <- paste0("N=", input$n, ", k=", input$k, ", &rho;=", input$rho, ", &alpha;=", input$alpha)
-            new.output <- paste0("<p><b>Power</b><br>", "Power ", new.output, "<br>", foot, "<p>")
+            new.output <- paste0("<p><b>Power</b><br>", "Power = ", new.output, "<br>", foot, "<p>")
 
         } else if (input$calculation == "samplesize") {
 

@@ -12,9 +12,7 @@ function (k, rho, alpha, power.desired) {
     areShort(k, rho, alpha, power.desired)
     areIntegers(k)
     areBetween0And1(rho, alpha, power.desired)
-    if (k < 2) {
-        stop("There must be at least two variables.")
-    }
+    if (k < 2) stop("There must be at least two variables.")
 
     ## Define key values
     N <- 1000             ## Starting point
@@ -23,20 +21,24 @@ function (k, rho, alpha, power.desired) {
     power.difference <- 1 ## Initialize greater than tol
     iteration <- 0
 
+
     while(power.difference > tol){
 
         power.estimated <- Power(N, k, rho, alpha, FALSE)
 
         ## Modified bisection
         if (power.estimated > power.desired) {
+            print("1")
             increment <- increment/2
             N <- N-increment
         } else if (power.estimated < power.desired) {
+            print("2")
             N <- N + increment ## Increment the N estimate by increment until it goes above the original estimate
         } else {
             break
         }
 
+        print("3")
         power.difference <- abs(power.estimated - power.desired)
 
         iteration <- iteration + 1
@@ -51,8 +53,8 @@ function (k, rho, alpha, power.desired) {
     N.high <- ceiling(N)
 
     ## Calculate power for each N; should straddle power.desired
-    power.low <- Power(N.low,k,rho,alpha, FALSE)
-    power.high <- Power(N.high,k,rho,alpha, FALSE)
+    power.low <- Power(N.low, k, rho, alpha, FALSE)
+    power.high <- Power(N.high, k, rho, alpha, FALSE)
 
     ## Assemble output matrix
     output.table <- matrix(c(power.low, power.high), nrow=1, ncol=2)
