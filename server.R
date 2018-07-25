@@ -187,6 +187,11 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$n, input$k, input$rho, input$alpha)
 
+            ## Do this in server.R so that Samplesize.R can use Power.R
+            source("errorcheck.R")
+            areIntegers(N)
+            areShort(N)
+
             ## Run the calculation
             Power <- dget("Power.R")
             new.output <- Power(input$n, input$k, input$rho, input$alpha, TRUE)

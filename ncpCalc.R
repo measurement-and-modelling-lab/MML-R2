@@ -8,10 +8,10 @@ function (percentile1, percentile2, df1, df2, ncp.initial, N, Fobs) {
 
     tolerance <- 0.000000001
     iteration <- 0
-    while (density.difference > tolerance) {                                                                ## repeat until density.difference is very small
-        density.new <- pf(Fobs, df1, df2, ncp.new)                                                          ## recalculate density
-        ncp.new <- -((density.new - percentile2) / (density.new - 0.5)) * (ncp.new - ncp.initial) + ncp.new ## recalculate ncp
-        density.difference <- abs(density.new - percentile2)                                                ## recalculate density.difference
+    while (density.difference > tolerance) { ## recalculate until density.difference is very small
+        density.new <- pf(Fobs, df1, df2, ncp.new)
+        ncp.new <- -((density.new - percentile2) / (density.new - 0.5)) * (ncp.new - ncp.initial) + ncp.new
+        density.difference <- abs(density.new - percentile2)
 
         if (ncp.new < 0) {
             ncp.new <- 0

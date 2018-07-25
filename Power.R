@@ -6,9 +6,10 @@ function(N, k, rho, alpha, round){
 
     ## Error checking
     source("errorcheck.R")
-    areShort(N, k, rho, alpha)
-    areIntegers(N, k)
+    areShort(k, rho, alpha)
+    areIntegers(k)
     areBetween0And1(rho, alpha)
+
     if (k < 2) {
         stop("There must be at least two variables!")
     }

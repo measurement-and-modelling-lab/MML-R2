@@ -1,77 +1,61 @@
-function (k, rho, alpha, power) {
-    ## k is the number of variables
+function (k, rho, alpha, power.desired) {
+    ## k is the number of variables, including the predictor
     ## rho is the population correlation value
     ## alpha is the type I error rate
     ## power is the desired power
 
+    ## Import functions
+    Power <- dget("Power.R")
     source("errorcheck.R")
     
     ## Check for errors
-    areShort(k, rho, alpha, power)
+    areShort(k, rho, alpha, power.desired)
     areIntegers(k)
-    areBetween0And1(rho, alpha, power)
+    areBetween0And1(rho, alpha, power.desired)
     if (k < 2) {
         stop("There must be at least two variables.")
     }
 
-    ## Define values
-    df1 <- k - 1
-    N <- 1000 ## starting point
-    i <- 1
-    increment <- 1000 ## Special value used for bisection range finding
-    count <- 0
-    tol <- 0.00000001 ## Tolerance
-    found <- FALSE
+    ## Define key values
+    N <- 1000             ## Starting point
+    increment <- 1000     ## Special value used for bisection range finding
+    tol <- 0.00000001     ## Tolerance
+    power.difference <- 1 ## Initialize greater than tol
+    iteration <- 0
 
-    while(!found){
+    while(power.difference > tol){
 
-        df2 <- N - df1 - 1
-        Fobs <- (rho/df1)/((1-rho)/(N-df1-1))
-        nc <- N*(rho/(1-rho))
-
-        ## Error check
-        check <- c()
-        check[1] <- suppressWarnings(qf(1-alpha,df1,df2))
-        check[2] <- suppressWarnings(pf(check[1], df1, df2, ncp=nc))
-        if (FALSE %in% is.finite(check)) {
-            stop("Sample size calculation failed.")
-        }
-
-        fcrit <- qf(1-alpha, df1, df2)
-        powerest <- 1-pf(fcrit, df1, df2, ncp=nc)
+        power.estimated <- Power(N, k, rho, alpha, FALSE)
 
         ## Modified bisection
-        if (powerest > power) {
+        if (power.estimated > power.desired) {
             increment <- increment/2
             N <- N-increment
-        } else if (powerest < power) {
-            N <- N + increment ##Increment the N estimate by increment until it goes above the original estimate
+        } else if (power.estimated < power.desired) {
+            N <- N + increment ## Increment the N estimate by increment until it goes above the original estimate
         }
 
-        if (abs(powerest - power) < tol) {
-            found <- TRUE
-        }
+        power.difference <- abs(power.estimated - power.desired)
 
-        count <- count + 1
-        if (count > 1000) {
+        iteration <- iteration + 1
+        if (iteration > 1000) {
             stop("Sample size calculation failed")
         }
+
     }
 
-    Nlow <- floor(N)
-    Nhigh <- ceiling(N)
+    ## Round N (which is almost certainly not an integer) both up and down
+    N.low <- floor(N)
+    N.high <- ceiling(N)
 
-
-    ## Calculate power using the lower N and the higher N
-    Power <- dget("Power.R")
-    powerlow <- Power(Nlow,k,rho,alpha, FALSE)
-    powerhigh <- Power(Nhigh,k,rho,alpha, FALSE)
-
+    ## Calculate power for each N; should straddle power.desired
+    power.low <- Power(N.low,k,rho,alpha, FALSE)
+    power.high <- Power(N.high,k,rho,alpha, FALSE)
 
     ## Assemble output matrix
-    output.table <- matrix(c(powerlow, powerhigh), nrow=1, ncol=2)
-    rowname1 <- paste0("N = ", Nlow)
-    rowname2 <- paste0("N = ", Nhigh)
+    output.table <- matrix(c(power.low, power.high), nrow=1, ncol=2)
+    rowname1 <- paste0("N = ", N.low)
+    rowname2 <- paste0("N = ", N.high)
     colnames(output.table) <- c(rowname1, rowname2)
     rownames(output.table) <- "<b>Power</b>"
 

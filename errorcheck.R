@@ -12,7 +12,7 @@ areShort <- function(...) {
 areIntegers <- function(...) {
     arguments <- list(...)
     for (a in arguments) {
-        if (grepl("\\D", a) || grepl("\\D", a)) {
+        if (a %% 1 > 0) {
             stop("A decimal number was given in place of an integer.")
         }
     }
