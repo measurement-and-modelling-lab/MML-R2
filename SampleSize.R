@@ -33,6 +33,8 @@ function (k, rho, alpha, power.desired) {
             N <- N-increment
         } else if (power.estimated < power.desired) {
             N <- N + increment ## Increment the N estimate by increment until it goes above the original estimate
+        } else {
+            break
         }
 
         power.difference <- abs(power.estimated - power.desired)

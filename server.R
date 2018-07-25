@@ -187,10 +187,18 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$n, input$k, input$rho, input$alpha)
 
-            ## Do this in server.R so that Samplesize.R can use Power.R
+            ## Error checking
+            ## Necessary to do this here since Power.R is called by SampleSize.R
             source("errorcheck.R")
-            areIntegers(N)
-            areShort(N)
+            areShort(input$k, input$rho, input$alpha)
+            areIntegers(input$n, input$k)
+            areBetween0And1(input$rho, input$alpha)
+            if (input$k < 2) {
+                stop("There must be at least two variables!")
+            }
+            if (input$n <= input$k) {
+                stop("There must be more observations than variables.")
+            }
 
             ## Run the calculation
             Power <- dget("Power.R")

@@ -4,35 +4,17 @@ function(N, k, rho, alpha, round){
     ## alpha is the type I error rate
     ## round is a logical indicating whether to round the output
 
-    ## Error checking
-    source("errorcheck.R")
-    areShort(k, rho, alpha)
-    areIntegers(k)
-    areBetween0And1(rho, alpha)
-
-    if (k < 2) {
-        stop("There must be at least two variables!")
-    }
-    if (N <= k) {
-        stop("There must be more observations than variables.")
-    }
-
-    df1 <- k-1
+    ## Derive key values from parameters
+    df1 <- k - 1
     df2 = N - df1 - 1
-    Fobs <- (rho/df1)/((1-rho)/(N-df1-1))
-    nc = N*(rho/(1-rho))
+    Fobs <- (rho / df1)/((1 - rho)/(N - df1 - 1))
+    ncp = N * (rho / (1 - rho)) ## noncentrality parameter
 
-    ## More error checking
-    check <- c()
-    check[1] <- suppressWarnings(qf(1-alpha,df1,df2))
-    check[2] <- suppressWarnings(pf(check[1], df1, df2, ncp=nc))
-    if (FALSE %in% is.finite(check)) {
-        stop("Power calculation failed.")
-    }
-    
-    fcrit <- qf(1-alpha,df1,df2)
-    power <- 1-pf(fcrit,df1,df1,ncp=nc)
-
+    ## Calculate fcrit and power; if either fails, return a clean error message
+    fcrit <- qf(1-alpha, df1, df2)
+    tryCatch(power <- pf(fcrit, df1, df2, ncp=ncp),
+             warning = function(w) stop("Power calculation failed."), 
+             error = function(e) stop("Power calculation failed."))
 
     ## Round output if requested
     if (round) {

@@ -14,14 +14,8 @@ function (N, k, R2, confidence) {
     areShort(N, k, R2, confidence)
     areIntegers(N, k)
     areBetween0And1(R2, confidence)
-
-    if (k < 2) {
-        stop("There must be at least two variables.")
-    }
-
-    if (N <= k) {
-        stop("There must be more observations than variables.")
-    }
+    if (k < 2)  stop("There must be at least two variables.")
+    if (N <= k) stop("There must be more observations than variables.")
 
 
     ## Derive inputs
