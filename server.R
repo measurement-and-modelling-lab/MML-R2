@@ -86,9 +86,7 @@ shinyServer(function(input, output, session) {
                      error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
 
             ## Limit the number of variables their data can have
-            if (ncol(data) > 16) {
-                stop("You cannot have more than 16 variables.")
-            }
+            if (ncol(data) > 16) stop("You cannot have more than 16 variables.")
 
             ## If the data is a correlation matrix, create sample size input
             if (nrow(data) == ncol(data)) {
@@ -121,9 +119,7 @@ shinyServer(function(input, output, session) {
                      error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
 
             ## Limit the number of variables their data can have
-            if (ncol(data) > 16) {
-                stop("You cannot have more than 16 variables.")
-            }
+            if (ncol(data) > 16) stop("You cannot have more than 16 variables.")
 
             ## Create radio buttons for choosing the criterion and predictors
             options <- 1:ncol(data)
@@ -132,8 +128,8 @@ shinyServer(function(input, output, session) {
                                   checkboxGroupInput("predictors", "Predictors:", options, values$predictors)),
                               div(style="display: inline-block;vertical-align:top; width: 50px;",
                                   radioButtons("criterion", "Criterion:", options, values$criterion)))
-
         }
+
         HTML(html_ui)
     })
 
@@ -154,7 +150,7 @@ shinyServer(function(input, output, session) {
             areIntegers(input$n, input$k)
             areBetween0And1(input$r, input$confidence)
             if (input$k < 2) stop("There must be at least two variables.")
-            if (input$n <= input$k) stop("The sample size must be greater than the number of variables.")
+            if (input$n <= input$k) stop("Sample size must be greater than the number of variables.")
 
             ## Run the calculation
             fixedCI <- dget("fixedCI.R")
@@ -171,16 +167,16 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$n, input$k, input$r, input$confidence)
 
-            ## Run calculation
-            randomCI <- dget("randomCI.R")
-            randomCI.output <- randomCI(input$n, input$k, input$r, input$confidence)
-
             ## Error checking
             areShort(input$n, input$k, input$r, input$confidence)
             areIntegers(input$n, input$k)
             areBetween0And1(input$r, input$confidence)
-            if (input$k < 2) stop("There must be at least two variables!")
-            if (input$n <= input$k) stop("There must be more observations than variables.")
+            if (input$k < 2) stop("There must be at least two variables.")
+            if (input$n <= input$k) stop("Sample size must be greater than the number of variables.")
+
+            ## Run calculation
+            randomCI <- dget("randomCI.R")
+            randomCI.output <- randomCI(input$n, input$k, input$r, input$confidence)
 
             ## Format output table
             output.new <- htmlTable(randomCI.output,
@@ -197,8 +193,8 @@ shinyServer(function(input, output, session) {
             areShort(input$k, input$rho, input$alpha)
             areIntegers(input$n, input$k)
             areBetween0And1(input$rho, input$alpha)
-            if (input$k < 2) stop("There must be at least two variables!")
-            if (input$n <= input$k) stop("There must be more observations than variables.")
+            if (input$k < 2) stop("There must be at least two variables.")
+            if (input$n <= input$k) stop("Sample size must be greater than the number of variables.")
 
             ## Run the calculation
             Power <- dget("Power.R")
