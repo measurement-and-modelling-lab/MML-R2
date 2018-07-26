@@ -5,20 +5,8 @@ function (n, k, Rsq, conlev) {
     ## conlev is the confidence level
 
     ## Import functions
-    source("errorcheck.R")
     Bisection <- dget("Bisection.R")
     SensibleRounding <- dget("SensibleRounding.R")
-
-    ## Error checking
-    areShort(n, k, Rsq, conlev)
-    areIntegers(n, k)
-    areBetween0And1(Rsq, conlev)
-    if (k < 2) {
-        stop("There must be at least two variables!")
-    }
-    if (n <= k) {
-        stop("There must be more observations than variables.")
-    }
 
     ## Run Bisections
     bisection.output <- Bisection(n, k, Rsq, conlev)

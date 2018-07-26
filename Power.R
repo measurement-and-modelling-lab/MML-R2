@@ -5,7 +5,7 @@ function(N, k, rho, alpha, round){
     ## round is a logical indicating whether to round the output
 
     # Import functions
-    PrettyRounding <- dget("PrettyRounding.R")
+    SensibleRounding <- dget("SensibleRounding.R")
 
     ## Derive key values from parameters
     df1 <- k - 1
@@ -15,12 +15,16 @@ function(N, k, rho, alpha, round){
 
     ## Calculate fcrit and power; if either fails, return a clean error message
     fcrit <- qf(1-alpha, df1, df2)
+    if (!is.finite(fcrit)) stop("Power calculation failed.")
     tryCatch(power <- 1 - pf(fcrit, df1, df2, ncp=ncp),
              warning = function(w) stop("Power calculation failed."), 
              error = function(e) stop("Power calculation failed."))
 
     if (round) {
-        power <- PrettyRounding(power, 5)
+        power <- SensibleRounding(power, 5)
+        if (power != "> 0.99999") {
+            power <- paste("=", power)
+        }
     }
 
     return(power)

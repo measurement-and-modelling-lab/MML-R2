@@ -4,16 +4,6 @@ require(htmlTable) || install.packages(htmlTable)
 
 shinyServer(function(input, output, session) {
 
-
-    ## Simultaneously require that several input$ variables exist before moving on
-    massValidateNeed <- function(...) {
-        arguments <- list(...)
-        for (a in arguments) {
-            validate(need(a, ""))
-        }
-    }
-
-
     ## Global values
     values <- reactiveValues()
     values$n <- ""
@@ -27,14 +17,12 @@ shinyServer(function(input, output, session) {
     values$calculation <- ""
     values$predictors <- ""
     values$criterion <- ""
-    values$old.output <-c("","","","","","","","","","")
-
+    values$output.old <-c("","","","","","","","","","")
 
     ## Show actual error messages
     observe({
         options(shiny.sanitize.errors = FALSE)
     })
-
 
     ## If calculation is changed, send current widget values to global, then update global calculation value to whatever calculator it's changing to
     observeEvent(input$calculation, {
@@ -53,7 +41,6 @@ shinyServer(function(input, output, session) {
 
     })
 
-
     ## Create input widgets, pulling default values from global
     output$valueInput <- renderUI({
 
@@ -61,35 +48,44 @@ shinyServer(function(input, output, session) {
 
         html_ui <- ""
         if (values$calculation == "fixedci") {
+
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
                               numericInput("r", "R squared:", values$r, 0, 1, 0.01),
                               numericInput("confidence", "Confidence level:", values$confidence, 0, 1, 0.01))
+
         } else if (values$calculation == "randomci") {
+
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
                               numericInput("r", "R squared:", values$r, 0, 1, 0.01),
                               numericInput("confidence", "Confidence level:", values$confidence, 0, 1, 0.01))
+
         } else if (values$calculation == "power") {
+
             html_ui <- paste0(numericInput("n", "Number of observations:", values$n, 3),
                               numericInput("k", "Number of variables, including criterion:", values$k, 2),
                               numericInput("rho", "Rho squared:", values$rho, 0, 1, 0.01),
                               numericInput("alpha", "Alpha:", values$alpha, 0, 1, 0.01))
+
         } else if (values$calculation == "samplesize") {
+
             html_ui <- paste0(numericInput("k", "Number of variables, including criterion:", values$k, 2),
                               numericInput("rho", "Rho squared:", values$rho, 0, 1, 0.01),
                               numericInput("alpha", "Alpha:", values$alpha, 0, 1, 0.01),
                               numericInput("power", "Power desired:", values$power, 0, 1, 0.01))
+
         } else if (values$calculation == "beta") {
 
             ## Check that data file has been uploaded
             validate(need(input$datafile, ""))
 
-            ## Error checking and data import
+            ## Check that the data file is readable
             tryCatch(data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=",")),
                      warning = function(w) stop("There was a problem reading your .csv file; you may need to add a line break at the end of the file."),
                      error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
 
+            ## Limit the number of variables their data can have
             if (ncol(data) > 16) {
                 stop("You cannot have more than 16 variables.")
             }
@@ -119,16 +115,15 @@ shinyServer(function(input, output, session) {
             ## Check that the data file has been uploaded
             validate(need(input$datafile, ""))
 
-            
             ## Error checking and data import
             tryCatch(data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=",")),
                      warning = function(w) stop("There was a problem reading your .csv file; you may need to add a line break at the end of the file."),
                      error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
 
+            ## Limit the number of variables their data can have
             if (ncol(data) > 16) {
                 stop("You cannot have more than 16 variables.")
             }
-
 
             ## Create radio buttons for choosing the criterion and predictors
             options <- 1:ncol(data)
@@ -146,17 +141,27 @@ shinyServer(function(input, output, session) {
     ## Run tests when run button is pressed
     R2 <- eventReactive(input$runButton, {
 
+        ## Import error checking functions
+        source("errorcheck.R")
+
         if (input$calculation == "fixedci") {
 
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$n, input$k, input$r, input$confidence)
 
-            ## Run the test; if errors are encountered, return a generic error message
-                fixedCI <- dget("fixedCI.R")
-                new.output <- fixedCI(input$n, input$k, input$r, input$confidence)
+            ## Error checking
+            areShort(input$n, input$k, input$r, input$confidence)
+            areIntegers(input$n, input$k)
+            areBetween0And1(input$r, input$confidence)
+            if (input$k < 2) stop("There must be at least two variables.")
+            if (input$n <= input$k) stop("The sample size must be greater than the number of variables.")
+
+            ## Run the calculation
+            fixedCI <- dget("fixedCI.R")
+            fixedCI.output <- fixedCI(input$n, input$k, input$r, input$confidence)
 
             ## Format the output table
-            new.output <- htmlTable(new.output,
+            output.new <- htmlTable(fixedCI.output,
                                     caption = "<b>Confidence Interval (Fixed Regressor)</b>",
                                     tfoot = paste0("N=", input$n, ", k=", input$k, ", R<sup>2</sup>=", input$r, ", 1-&alpha;=", input$confidence),
                                     css.cell = "padding-left: 2em; padding-right: 2em;")
@@ -168,10 +173,17 @@ shinyServer(function(input, output, session) {
 
             ## Run calculation
             randomCI <- dget("randomCI.R")
-            new.output <- randomCI(input$n, input$k, input$r, input$confidence)
+            randomCI.output <- randomCI(input$n, input$k, input$r, input$confidence)
+
+            ## Error checking
+            areShort(input$n, input$k, input$r, input$confidence)
+            areIntegers(input$n, input$k)
+            areBetween0And1(input$r, input$confidence)
+            if (input$k < 2) stop("There must be at least two variables!")
+            if (input$n <= input$k) stop("There must be more observations than variables.")
 
             ## Format output table
-            new.output <- htmlTable(new.output,
+            output.new <- htmlTable(randomCI.output,
                                     caption = "<b>Confidence Interval (Random Regressor)</b>",
                                     tfoot = paste0("N=", input$n, ", k=", input$k, ", R<sup>2</sup>=", input$r, ", 1-&alpha;=", input$confidence),
                                     css.cell = "padding-left: 2em; padding-right: 2em;")
@@ -181,37 +193,38 @@ shinyServer(function(input, output, session) {
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$n, input$k, input$rho, input$alpha)
 
-            ## Import functions
-            source("errorcheck.R")
-            Power <- dget("Power.R")
-
             ## Error checking
-            ## Necessary to do this here since Power.R is called by SampleSize.R
             areShort(input$k, input$rho, input$alpha)
             areIntegers(input$n, input$k)
             areBetween0And1(input$rho, input$alpha)
             if (input$k < 2) stop("There must be at least two variables!")
             if (input$n <= input$k) stop("There must be more observations than variables.")
-            if (input$rho == 0) stop("The squared multiple correlation can't be zero under the alternative hypothesis.")
 
             ## Run the calculation
-            new.output <- Power(input$n, input$k, input$rho, input$alpha, TRUE)
+            Power <- dget("Power.R")
+            power.output <- Power(input$n, input$k, input$rho, input$alpha, TRUE)
 
             ## Format output in html
             foot <- paste0("N=", input$n, ", k=", input$k, ", &rho;=", input$rho, ", &alpha;=", input$alpha)
-            new.output <- paste0("<p><b>Power</b><br>", "Power = ", new.output, "<br>", foot, "<p>")
+            output.new <- paste0("<p><b>Power</b><br>", "Power ", power.output, "<br>", foot, "<p>")
 
         } else if (input$calculation == "samplesize") {
 
             ## Ensure that the necessary values have been entered
             massValidateNeed(input$k, input$rho, input$alpha, input$power)
 
+            ## Check for errors
+            areShort(input$k, input$rho, input$alpha, input$power)
+            areIntegers(input$k)
+            areBetween0And1(input$rho, input$alpha, input$power)
+            if (input$k < 2) stop("There must be at least two variables.")
+
             ## Run the calculation
             SampleSize <- dget("SampleSize.R")
-            new.output <- SampleSize(input$k, input$rho, input$alpha, input$power)
+            samplesize.output <- SampleSize(input$k, input$rho, input$alpha, input$power)
 
             ## Assemble output table
-            new.output <- htmlTable(new.output,
+            output.new <- htmlTable(samplesize.output,
                                     caption = "<b>Sample Size</b>",
                                     tfoot = paste0("k=", input$k, ", &rho;=", input$rho, ", &alpha;=", input$alpha, ", 1-&beta;=", input$power),
                                     css.cell = "padding-left: .5em; padding-right: .2em;")
@@ -223,17 +236,28 @@ shinyServer(function(input, output, session) {
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
             if (ncol(data) == nrow(data)) {
                 validate(need(input$n, ""))
+                n <- input$n
+                areIntegers(input$n)
+            } else {
+                n <- nrow(data)
             }
+
+            ## Error checking
+            datacheck <- dget("datacheck.R")
+            data <- datacheck(data)
+            if (input$criterion %in% input$predictors) stop("A variable cannot be both a predictor and the criterion.")
+            if (length(input$predictors) < 2) stop("You must have at least two predictors.")
+            areBetween0And1(input$confidence)
 
             ## Run the calculation
             Beta <- dget("Beta.R")
-            new.output <- Beta(data, input$n, input$criterion, input$predictors, input$familywise, input$confidence)
+            beta.output <- Beta(data, n, input$criterion, input$predictors, input$familywise, input$confidence)
 
             ## Format output table
             FW <- c("None", "Bonferroni", "Dunn-Sidak", "Stepdown Bonferroni", "Stepdown Dunn-Sidak")
             names(FW) <- c("uncorrected", "bonferroni", "sidak", "stepdown_bonferroni", "stepdown_sidak")
             FW <- FW[[input$familywise]]
-            new.output <- htmlTable(new.output,
+            output.new <- htmlTable(beta.output,
                                     css.cell = "padding-left: .5em; padding-right: .5em;",
                                     caption = "<b>Standardized Beta Coefficients</b>",
                                     cgroup = c("Estimates", ""),
@@ -250,22 +274,27 @@ shinyServer(function(input, output, session) {
             criterion <- as.numeric(input$criterion)
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
 
+            ## Error checking
+            datacheck <- dget("datacheck.R")
+            data <- datacheck(data)
+            if (input$criterion %in% input$predictors) stop("A variable cannot be both a predictor and the criterion.")
+
             ## Run the calculation
             R2 <- dget("R2.R")
-            new.output <- R2(data, predictors, criterion)
+            r2.output <- R2(data, predictors, criterion)
 
             ## Assemble output table
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
-            new.output <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> ", new.output, "<br>", foot, "<p>")
+            output.new <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> ", r2.output, "<br>", foot, "<p>")
 
         }
 
         ## Print the current output plus the last 9
-        ## But only if the new output is different from the previous one
-        if (new.output != values$old.output[1]) {
-            values$old.output <- c(new.output, values$old.output)[1:10]
+        ## But only if the output.new is different from the previous one
+        if (output.new != values$output.old[1]) {
+            values$output.old <- c(output.new, values$output.old)[1:10]
         }
-        html_output <- paste(values$old.output, collapse="")
+        html_output <- paste(values$output.old, collapse="")
         HTML(html_output)
 
     })

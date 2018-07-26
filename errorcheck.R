@@ -1,3 +1,11 @@
+## Simultaneously require that several input$ variables exist before moving on
+massValidateNeed <- function(...) {
+    arguments <- list(...)
+    for (a in arguments) {
+        validate(need(a, ""))
+    }
+}
+
 ## Check that the input doesn't have too many digits
 areShort <- function(...) {
     arguments <- list(...)

@@ -7,51 +7,7 @@ function(data, N, criterion, predictors, familywise, confidence) {
     ## confidence is the confidence level for the confidence interval
 
     ## Import functions
-    source("errorcheck.R")
     SensibleRounding <- dget("SensibleRounding.R")
-
-    is.square <- ncol(data) == nrow(data)
-
-    ## If the upper triangle of a correlation matrix is empty, make the matrix symmetric
-    ## Otherwise, check whether the matrix is symmetric and if not return an error
-    is.square <- ncol(data) == nrow(data)
-    if (is.square) {
-        current.upper.triangle <- data[upper.tri(data)]
-        symmetric.upper.triangle <- t(data)[upper.tri(t(data))]
-        if (all(is.na(current.upper.triangle))) {
-            data[upper.tri(data)] <- symmetric.upper.triangle
-        } else if (!all(current.upper.triangle == symmetric.upper.triangle)) {
-            stop("Correlation/covariance matrix is not symmetric.")
-        }
-    } else {
-        N <- nrow(data)
-        data <- cor(data)
-    }
-
-    ## If the matrix is a covariance matrix, convert it
-    if (FALSE %in% (diag(data) == 1)) {
-        data <- cov2cor(data)
-    }
-
-    ## Check that the correlation matrix is positive definite
-    eigen.values <- eigen(data)[[1]]
-    if (TRUE %in% (eigen.values <= 0)) {
-        stop('Data matrix is not positive definite.')
-    }
-
-    if (NA %in% as.numeric(data)) {
-        stop("Your data has missing or non-numeric elements.")
-    }
-
-    areIntegers(N)
-    areBetween0And1(confidence)
-    if (criterion %in% predictors) {
-        stop("A variable cannot be both a predictor and the criterion.")
-    }
-    if (length(predictors) < 2) {
-        stop("You must have at least two predictors.")
-    }
-    
 
     ## Import other variables
     predictors <- as.numeric(predictors)
@@ -61,7 +17,6 @@ function(data, N, criterion, predictors, familywise, confidence) {
     vy <- data[criterion, criterion]
     alpha <- 1 - as.numeric(confidence)
     
-
     ## Extract the lower triangle and main diagonal from a matrix as a vector
     vech <- function(x) {
         t(x[!upper.tri(x)])
@@ -115,27 +70,27 @@ function(data, N, criterion, predictors, familywise, confidence) {
     PART1<-diag(c(solve(diag(2 * sx * sy)) %*% bu))
     PART2<-V
 
-    ##fouladi debug ver 1 of PART3 puts it as in Yuan/Chan... note use of kronecker product
-    ##fouladi debug ver 2 of PART3 adjusts it to be more similar to JOnes/Waller
-    ##this did not work, using Yuan and Chan  this was off by magnitudes
+    ## fouladi debug ver 1 of PART3 puts it as in Yuan/Chan... note use of kronecker product
+    ## fouladi debug ver 2 of PART3 adjusts it to be more similar to JOnes/Waller
+    ## this did not work, using Yuan and Chan  this was off by magnitudes
     ##      PART3<-diag(sx / sy) %*% kronecker(t(bu),t(cx)) %*% Dn(p)
-    ##following JOnes/Waller am using solve(cx) in a new variable called invcx
+    ## following JOnes/Waller am using solve(cx) in a new variable called invcx
     invcx<-solve(cx)
     PART3<-diag(sx / sy) %*% kronecker(t(bu),t(invcx)) %*% Dn(p)
 
-    ##fouladi debug
-    ##original db[, 1:ncx] <- (diag(c(solve(diag(2 * sx * sy)) %*% bu)) %*% V -
-    ##original 				diag(sx / sy) %*% (t(bu) %*% solve(cx)) %*% Dn(p))
-    ##fouladifix line below by refering to original article Yuan and Chan 2011 with modification, see above for
+    ## fouladi debug
+    ## original db[, 1:ncx] <- (diag(c(solve(diag(2 * sx * sy)) %*% bu)) %*% V -
+    ## original 				diag(sx / sy) %*% (t(bu) %*% solve(cx)) %*% Dn(p))
+    ## fouladifix line below by refering to original article Yuan and Chan 2011 with modification, see above for
     ## PART1 PART2 and PART3
     db[, 1:ncx] <- ((PART1 %*% PART2) -
                     PART3)
-    ##fouladi debug
-    ##original db[, (ncx+1):(ncx+p)] <- diag(sx / sy) %*% solve(cx)
-    ##fouladifix line below below by refering to original article Yuan and Chan 2011 with modification, 
-    ##using Yuan and Chan article magnitudes off 
+    ## fouladi debug
+    ## original db[, (ncx+1):(ncx+p)] <- diag(sx / sy) %*% solve(cx)
+    ## fouladifix line below below by refering to original article Yuan and Chan 2011 with modification, 
+    ## using Yuan and Chan article magnitudes off 
     ##     db[, (ncx+1):(ncx+p)] <- diag(sx / sy) %*% t(cx)
-    ##following Jones/Waller am using solve(cx) in a new variable called invcx
+    ## following Jones/Waller am using solve(cx) in a new variable called invcx
     db[, (ncx+1):(ncx+p)] <- diag(sx / sy) %*% t(invcx)
 
     db[,ncovs] <- -diag(sx / (2 * sy^3)) %*% bu
@@ -165,7 +120,7 @@ function(data, N, criterion, predictors, familywise, confidence) {
     DEL.cmat <- db %*% cov.cov %*% t(db) / (N - 3)
     b.nms <- NULL
 
-    ##fouladi debug
+    ## fouladi debug
     ## there was a typo, I changed patse to paste function
     for(i in 1:p) {
 	b.nms[i] <- paste("beta_", i, sep='')
@@ -216,6 +171,7 @@ function(data, N, criterion, predictors, familywise, confidence) {
     tc <- qt(alpha/2, N-p-1, lower = F)
 
     ## Error check on confidence interval
+    print(tc)
     if (FALSE %in% is.finite(tc)) {
         stop("Confidence interval calculation failed.")
     }
@@ -228,7 +184,6 @@ function(data, N, criterion, predictors, familywise, confidence) {
     output <- cbind(CIs, DELse, test.statistic, p.values, alpha)
     rownames(output) <- paste("<b>&beta;<sub>", 1:p, '</sub></b>', sep='')
     colnames(output) <- c("Lower", "Point", "Upper", "Std. Error", paste0("t<sub>", N-p-1, "</sub>"), "p", "&alpha;")
-
 
     ## Round output
     output <- SensibleRounding(output, 5)
