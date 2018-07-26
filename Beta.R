@@ -171,7 +171,6 @@ function(data, N, criterion, predictors, familywise, confidence) {
     tc <- qt(alpha/2, N-p-1, lower = F)
 
     ## Error check on confidence interval
-    print(tc)
     if (FALSE %in% is.finite(tc)) {
         stop("Confidence interval calculation failed.")
     }

@@ -10,8 +10,8 @@ function (n, k, Rsq, conlev) {
 
     ## Run Bisections
     bisection.output <- Bisection(n, k, Rsq, conlev)
-    upper <- bisection.output[2]
     lower <- bisection.output[1]
+    upper <- bisection.output[2]
     lbound <- Bisection(n, k, Rsq,  conlev-(1-conlev))[1]
 
     ## Asssemble input matrix

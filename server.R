@@ -42,7 +42,7 @@ shinyServer(function(input, output, session) {
     })
 
     ## Create input widgets, pulling default values from global
-    output$valueInput <- renderUI({
+    output$R2Input <- renderUI({
 
         validate(need(input$calculation, ""))
 
@@ -301,7 +301,7 @@ shinyServer(function(input, output, session) {
 
 
     ## Get values from R2() then send output to ui.R
-    output$finaloutput <- renderUI({
+    output$R2Output <- renderUI({
         R2()
     })
 
