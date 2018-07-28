@@ -2,6 +2,16 @@ require(shiny) || install.packages(shiny)
 require(shinythemes) || install.packages(shinythemes)
 require(htmlTable) || install.packages(htmlTable)
 
+## Import functions
+Beta <- dget("Beta.R")
+datacheck <- dget("datacheck.R")
+source("errorcheck.R")
+fixedCI <- dget("fixedCI.R")
+Power <- dget("Power.R")
+randomCI <- dget("randomCI.R")
+R2 <- dget("R2.R")
+SampleSize <- dget("SampleSize.R")
+
 shinyServer(function(input, output, session) {
 
     ## Global values
@@ -136,11 +146,7 @@ shinyServer(function(input, output, session) {
     })
 
 
-    ## Run tests when run button is pressed
-    R2 <- eventReactive(input$runButton, {
-
-        ## Import error checking functions
-        source("errorcheck.R")
+    R2 <- eventReactive(input$runButton, { ## Run tests when run button is pressed
 
         if (input$calculation == "fixedci") {
 
@@ -155,7 +161,6 @@ shinyServer(function(input, output, session) {
             if (input$n <= input$k) stop("Sample size must be greater than the number of variables.")
 
             ## Run the calculation
-            fixedCI <- dget("fixedCI.R")
             fixedCI.output <- fixedCI(input$n, input$k, input$r, input$confidence)
 
             ## Format the output table
@@ -177,7 +182,6 @@ shinyServer(function(input, output, session) {
             if (input$n <= input$k) stop("Sample size must be greater than the number of variables.")
 
             ## Run calculation
-            randomCI <- dget("randomCI.R")
             randomCI.output <- randomCI(input$n, input$k, input$r, input$confidence)
 
             ## Format output table
@@ -199,7 +203,6 @@ shinyServer(function(input, output, session) {
             if (input$n <= input$k) stop("Sample size must be greater than the number of variables.")
 
             ## Run the calculation
-            Power <- dget("Power.R")
             power.output <- Power(input$n, input$k, input$rho, input$alpha, TRUE)
 
             ## Format output in html
@@ -218,7 +221,6 @@ shinyServer(function(input, output, session) {
             if (input$k < 2) stop("There must be at least two variables.")
 
             ## Run the calculation
-            SampleSize <- dget("SampleSize.R")
             samplesize.output <- SampleSize(input$k, input$rho, input$alpha, input$power)
 
             ## Assemble output table
@@ -241,14 +243,12 @@ shinyServer(function(input, output, session) {
             }
 
             ## Error checking
-            datacheck <- dget("datacheck.R")
             data <- datacheck(data)
             if (input$criterion %in% input$predictors) stop("A variable cannot be both a predictor and the criterion.")
             if (length(input$predictors) < 2) stop("You must have at least two predictors.")
             areBetween0And1(input$confidence)
 
             ## Run the calculation
-            Beta <- dget("Beta.R")
             beta.output <- Beta(data, n, input$criterion, input$predictors, input$familywise, input$confidence)
 
             ## Format output table
@@ -273,12 +273,10 @@ shinyServer(function(input, output, session) {
             data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=","))
 
             ## Error checking
-            datacheck <- dget("datacheck.R")
             data <- datacheck(data)
             if (input$criterion %in% input$predictors) stop("A variable cannot be both a predictor and the criterion.")
 
             ## Run the calculation
-            R2 <- dget("R2.R")
             r2.output <- R2(data, predictors, criterion)
 
             ## Assemble output table

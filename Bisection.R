@@ -40,7 +40,6 @@ function (n, k, Rsq, conlev) {
 
         if (check > criterion) {
 
-            count <- 0
             while (abs(diff3) > 1e-6) {
                 for (i in 1:maxiter) {
                     for (root in 1:2) {
@@ -78,10 +77,6 @@ function (n, k, Rsq, conlev) {
                 } else {
                     x1 <- x3
                     upper <- x3
-                }
-                count <- count+1
-                if (count == 1000) {
-                    stop()
                 }
             }
         }
