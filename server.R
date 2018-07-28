@@ -81,9 +81,10 @@ shinyServer(function(input, output, session) {
             validate(need(input$datafile, ""))
 
             ## Check that the data file is readable
+            cat("\n", file=input$datafile[[4]], append = TRUE) ## append the necessary line break to the end
             tryCatch(data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=",")),
-                     warning = function(w) stop("There was a problem reading your .csv file; you may need to add a line break at the end of the file."),
-                     error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
+                     warning = function(w) stop("There was a problem reading your .csv file."),
+                     error = function(e) stop("There was a problem reading your .csv file.."))
 
             ## Limit the number of variables their data can have
             if (ncol(data) > 16) stop("You cannot have more than 16 variables.")
@@ -114,9 +115,10 @@ shinyServer(function(input, output, session) {
             validate(need(input$datafile, ""))
 
             ## Error checking and data import
+            cat("\n", file=input$datafile[[4]], append = TRUE) ## append the necessary line break to the end
             tryCatch(data <- as.matrix(read.csv(file=input$datafile[[4]], head=FALSE, sep=",")),
-                     warning = function(w) stop("There was a problem reading your .csv file; you may need to add a line break at the end of the file."),
-                     error = function(e) stop("There was a problem reading your .csv file. You may need to add a line break at the end of the file."))
+                     warning = function(w) stop("There was a problem reading your .csv file."),
+                     error = function(e) stop("There was a problem reading your .csv file."))
 
             ## Limit the number of variables their data can have
             if (ncol(data) > 16) stop("You cannot have more than 16 variables.")
