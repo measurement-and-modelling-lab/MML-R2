@@ -4,7 +4,7 @@ function (data, X, Y) {
     ## Y is a single positive integer corresponding to a column of X to use as the criterion
 
     ## Import functions
-    SensibleRounding <- dget("SensibleRounding.R")
+    RoundPercentile <- dget("RoundPercentile.R")
 
     ## Calculate R2
     Rxy <- data[X, Y, drop=FALSE] # single column matrix of the the correlations between Y and each predictor
@@ -13,7 +13,7 @@ function (data, X, Y) {
     R2 <- t(b) %*% Rxy
 
     ## Round R2
-    R2 <- SensibleRounding(R2, 5)
+    R2 <- RoundPercentile(R2)
 
     return(R2)
 }

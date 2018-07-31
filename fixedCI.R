@@ -6,7 +6,7 @@ function (N, k, R2, confidence) {
 
     ## Import functions
     limitCalc <- dget("limitCalc.R")
-    SensibleRounding <- dget("SensibleRounding.R")
+    RoundPercentile <- dget("RoundPercentile.R")
 
     ## Derive inputs
     percentile.lower <- (1 - confidence) / 2
@@ -35,7 +35,7 @@ function (N, k, R2, confidence) {
     ## Assemble output matrix
     output.matrix <- matrix(c(lower.limit, upper.limit, lower.bound, plevel), nrow=1)
     colnames(output.matrix) <- c('Lower Limit', 'Upper Limit', 'Lower Bound', 'plevel')
-    output.matrix <- SensibleRounding(output.matrix, 5)
+    output.matrix <- RoundPercentile(output.matrix)
 
     return(output.matrix)
 

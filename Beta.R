@@ -7,7 +7,7 @@ function(data, N, criterion, predictors, familywise, confidence) {
     ## confidence is the confidence level for the confidence interval
 
     ## Import functions
-    SensibleRounding <- dget("SensibleRounding.R")
+    RoundPercentile <- dget("RoundPercentile.R")
 
     ## Import other variables
     predictors <- as.numeric(predictors)
@@ -185,7 +185,10 @@ function(data, N, criterion, predictors, familywise, confidence) {
     colnames(output) <- c("Lower", "Point", "Upper", "Std. Error", paste0("t<sub>", N-p-1, "</sub>"), "p", "&alpha;")
 
     ## Round output
-    output <- SensibleRounding(output, 5)
+    output[,c(1,2,3,6,7)] <- RoundPercentile(output[,c(1,2,3,6,7)])
+    output[,5] <- round(output[,5], 5)
+    output[,4] <- round(output[,5], 5)
+    if (output[,4] == 0) output[,4] <- "< 0.00001"
 
     return(output)
 }

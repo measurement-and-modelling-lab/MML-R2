@@ -5,7 +5,7 @@ function(N, k, rho, alpha, round){
     ## round is a logical indicating whether to round the output
 
     # Import functions
-    SensibleRounding <- dget("SensibleRounding.R")
+    RoundPercentile <- dget("RoundPercentile.R")
 
     ## Derive key values from parameters
     df1 <- k - 1
@@ -21,10 +21,7 @@ function(N, k, rho, alpha, round){
              error = function(e) stop("Power calculation failed."))
 
     if (round) {
-        power <- SensibleRounding(power, 5)
-        if (power != "> 0.99999") {
-            power <- paste("=", power)
-        }
+        power <- RoundPercentile(power)
     }
 
     return(power)

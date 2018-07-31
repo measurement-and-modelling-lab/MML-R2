@@ -6,7 +6,7 @@ function (n, k, Rsq, conlev) {
 
     ## Import functions
     Bisection <- dget("Bisection.R")
-    SensibleRounding <- dget("SensibleRounding.R")
+    RoundPercentile <- dget("RoundPercentile.R")
 
     ## Run Bisections
     bisection.output <- Bisection(n, k, Rsq, conlev)
@@ -19,7 +19,7 @@ function (n, k, Rsq, conlev) {
     colnames(output.table) <- c('Lower Limit', 'Upper Limit', 'Lower Bound')
     
     ## Round output
-    output.table <- SensibleRounding(output.table, 5)
+    output.table <- RoundPercentile(output.table)
 
     return(output.table)
 

@@ -6,7 +6,7 @@ function (k, rho, alpha, power.desired) {
 
     ## Import functions
     Power <- dget("Power.R")
-    SensibleRounding <- dget("SensibleRounding.R")
+    RoundPercentile <- dget("RoundPercentile.R")
     
     ## Define key values
     N <- 1000             ## Starting point
@@ -55,7 +55,7 @@ function (k, rho, alpha, power.desired) {
     rownames(output.table) <- "<b>Power</b>"
 
     ## Round output
-    output.table <- SensibleRounding(output.table, 5)
+    output.table <- RoundPercentile(output.table)
 
     return(output.table)
 }
