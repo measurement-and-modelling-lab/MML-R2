@@ -36,8 +36,8 @@ shinyUI(fluidPage(theme = "simplex.css",
                                             HTML("Confidence interval on population R<sup>2</sup> (random regressor)"),
                                             HTML("Power to reject population R<sup>2</sup> = 0"),
                                             HTML("Sample size to reject population R<sup>2</sup> = 0"),
-                                            "Standardized regression coefficients and CIs",
-                                            HTML("Calculate R<sup>2</sup> from sample data")),
+                                            "Standardized regression coefficients from sample data",
+                                            HTML("R<sup>2</sup> from sample data")),
                          choiceValues = list("fixedci", "randomci", "power", "samplesize", "beta", "r2")),
             HTML("<hr>"),
 
@@ -59,7 +59,18 @@ shinyUI(fluidPage(theme = "simplex.css",
                                        a correlation matrix, or a covariance matrix. It should be in headerless, .csv format."))),
 
         mainPanel(
-            htmlOutput("R2Output"))),
+
+            tabsetPanel(
+
+                id = "inTabset",
+                                        #tabPanel(value = "about", "About", includeHTML("./documentation/about.html")),
+                tabPanel(value = "about", "About", includeHTML("./documentation/about.html")),
+                tabPanel(value = "output", "Output", htmlOutput("R2Output"))
+
+            )
+        )),
+
+
 
   ## Footer bar with links to lab webpage and sfu.ca
   HTML('
