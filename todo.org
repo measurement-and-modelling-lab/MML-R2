@@ -1,1 +1,2 @@
  - Add more comments to the calculation functions
+ - Fill in about tab
