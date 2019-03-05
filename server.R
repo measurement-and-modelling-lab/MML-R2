@@ -285,7 +285,7 @@ shinyServer(function(input, output, session) {
 
             ## Assemble output table
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
-            output.new <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> ", r2.output, "<br>", foot, "<p>")
+            output.new <- paste0("<p><b>Squared Multiple Correlation</b><br>", "R<sup>2</sup> = ", r2.output, "<br>", foot, "<p>")
 
         }
 
