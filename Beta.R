@@ -187,8 +187,10 @@ function(data, N, criterion, predictors, familywise, confidence) {
     ## Round output
     output[,c(1,2,3,6,7)] <- RoundPercentile(output[,c(1,2,3,6,7)])
     output[,5] <- round(output[,5], 5)
-    output[,4] <- round(output[,5], 5)
-    if (output[,4] == 0) output[,4] <- "< 0.00001"
+    output[,4] <- round(output[,4], 5)
+    if (output[,4] == 0) {
+        output[,4] <- "< 0.00001"
+    }
 
     return(output)
 }
