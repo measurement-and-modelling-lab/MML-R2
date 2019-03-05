@@ -176,7 +176,9 @@ function(data, N, criterion, predictors, familywise, confidence) {
     }
 
     for (i in 1:p) {
-	CIs[i,] <- c(beta[i] - tc[i] * DELse[i], beta[i], beta[i] + tc[i] * DELse[i])
+	CIs[i,] <- c(beta[i] - tc[i] * DELse[i], ## LL
+                     beta[i],
+                     beta[i] + tc[i] * DELse[i]) ## UL
     }
 
     ## Assemble output
