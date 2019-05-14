@@ -13,6 +13,7 @@ shinyUI(fluidPage(theme = "simplex.css",
                   &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/MML-Multicorr/"><font color="white">MML-Multicorr</font></a>
                   &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/MML-WBCORR/"><font color="white">MML-WBCORR</font></a>
                   &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/pserafin/csv-generator/"><font color="white">CSV Generator</font></a>
+                  &emsp;&nbsp;<a href="http://members.psyc.sfu.ca/labs/mml/research"><font color="white">Distribution Tests</font></a>
               </b>
           </div>
           <br>'),
@@ -64,9 +65,8 @@ shinyUI(fluidPage(theme = "simplex.css",
 
                 id = "inTabset",
                                         #tabPanel(value = "about", "About", includeHTML("./documentation/about.html")),
-                tabPanel(value = "about", "About", includeHTML("./documentation/about.html")),
-                tabPanel(value = "output", "Output", htmlOutput("R2Output"))
-
+                tabPanel(value = "output", "Output", htmlOutput("R2Output")),
+                tabPanel(value = "about", "About", includeHTML("./documentation/about.html"))
             )
         )),
 
