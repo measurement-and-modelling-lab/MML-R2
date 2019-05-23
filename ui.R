@@ -2,21 +2,49 @@ shinyUI(fluidPage(theme = "simplex.css",
 
     ## Header bar with links to other apps
     HTML('<br>
-          <link rel="stylesheet" type="text/css" href="index.css">
-          <style>
-              html { overflow-y: scroll; }
-          </style>
-          <div class="bar">
-              <b class="title">Measurement and Modelling Lab &nbsp; - &nbsp; Tools</b><br class="rwd-break">
-              <b class="link">
-                  <a href="https://shiny.rcg.sfu.ca/u/tmustaph/MML-R2/"><font color="#00ca8a">MML-R2</font></a>
-                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/tmustaph/MML-Multicorr/"><font color="white">MML-Multicorr</font></a>
-                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/tmustaph/MML-WBCORR/"><font color="white">MML-WBCORR</font></a>
-                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/tmustaph/csv-generator/"><font color="white">CSV Generator</font></a>
-                  &emsp;&nbsp;<a href="https://shiny.rcg.sfu.ca/u/tmustaph/distribution-tests/"><font color="white">Distribution Tests</font></a>
-              </b>
-          </div>
-          <br>'),
+  
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script>
+function myFunction() {
+  var x = document.getElementById("myTopnav");
+  if (x.className === "topnav") {
+    x.className += " responsive";
+    document.getElementById("row-break").style.display = "inline";
+    document.getElementById("row-break2").style.display = "inline";
+  } else {
+    x.className = "topnav";
+    document.getElementById("row-break").style.display = "none";
+    document.getElementById("row-break2").style.display = "none";
+  }
+}
+</script>
+  <style>
+    html {
+       overflow-y: scroll;
+       }
+       </style>
+    <title>Analytics^2 - About</title>
+    <div class="bar">
+    <div class="topnav" id="myTopnav"">
+      <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+        <i class="fa fa-bars"></i>
+      </a>
+      <b class="title">Measurement and Modelling Lab &nbsp; - &nbsp; Tools</b><br class="rwd-break" id="row-break"><br class="rwd-break" id="row-break2">
+      <a href="https://shiny.rcg.sfu.ca/u/tmustaph/MML-R2/"><font color="#00ca8a">MML-R2</font></a>
+      <a href="https://shiny.rcg.sfu.ca/u/tmustaph/MML-Multicorr/"><font color="white">MML-Multicorr</font></a>
+      <a href="https://shiny.rcg.sfu.ca/u/tmustaph/MML-WBCORR/"><font color="white">MML-WBCORR</font></a>
+      <a href="https://shiny.rcg.sfu.ca/u/tmustaph/csv-generator/"><font color="white">CSV Generator</font></a>
+      <a href="https://shiny.rcg.sfu.ca/u/tmustaph/distribution-tests/"><font color="white">Distribution Tests</font></a>
+
+    </div>
+    </div>
+         
+         
+         
+  '),
+    
+    HTML("<br>"),
 
     ## CSS styling
     tags$head(
