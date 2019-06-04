@@ -280,8 +280,8 @@ shinyServer(function(input, output, session) {
             if (input$criterion %in% input$predictors) stop("A variable cannot be both a predictor and the criterion.")
 
             ## Run the calculation
-            R2 <- dget("R2.R")
-            r2.output <- R2(data, predictors, criterion)
+            r2 <- dget("R2.R")
+            r2.output <- r2(data, predictors, criterion)
 
             ## Assemble output table
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
