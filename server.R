@@ -137,7 +137,7 @@ shinyServer(function(input, output, session) {
     })
 
 
-    R2 <- eventReactive(input$runButton, { ## Run tests when run button is pressed
+    R2_main <- eventReactive(input$runButton, { ## Run tests when run button is pressed
 
         ## Import functions used by 2 or more tests
         datacheck <- dget("datacheck.R")
@@ -280,8 +280,8 @@ shinyServer(function(input, output, session) {
             if (input$criterion %in% input$predictors) stop("A variable cannot be both a predictor and the criterion.")
 
             ## Run the calculation
-            r2 <- dget("R2.R")
-            r2.output <- r2(data, predictors, criterion)
+            R2 <- dget("R2.R")
+            r2.output <- R2(data, predictors, criterion)
 
             ## Assemble output table
             foot <- paste0("Y=", criterion, ", X=", paste(predictors, collapse=","))
@@ -300,9 +300,9 @@ shinyServer(function(input, output, session) {
     })
 
 
-    ## Get values from R2() then send output to ui.R
+    ## Get values from R2_main() then send output to ui.R
     output$R2Output <- renderUI({
-        R2()
+        R2_main()
     })
 
 })
