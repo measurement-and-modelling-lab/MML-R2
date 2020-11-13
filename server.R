@@ -204,7 +204,7 @@ shinyServer(function(input, output, session) {
             power.output <- Power(input$n, input$k, input$rho, input$alpha, TRUE)
 
             ## Format output in html
-            foot <- paste0("N=", input$n, ", k=", input$k, ", &rho;=", input$rho, ", &alpha;=", input$alpha)
+            foot <- paste0("N=", input$n, ", k=", input$k, ", &rho;<sup>2</sup>=", input$rho, ", &alpha;=", input$alpha)
             output.new <- paste0("<p><b>Power</b><br>", "Power ", power.output, "<br>", foot, "<p>")
 
         } else if (input$calculation == "samplesize") {
@@ -225,7 +225,7 @@ shinyServer(function(input, output, session) {
             ## Assemble output table
             output.new <- htmlTable(samplesize.output,
                                     caption = "<b>Sample Size</b>",
-                                    tfoot = paste0("k=", input$k, ", &rho;=", input$rho, ", &alpha;=", input$alpha, ", 1-&beta;=", input$power),
+                                    tfoot = paste0("k=", input$k, ", &rho;<sup>2</sup>=", input$rho, ", &alpha;=", input$alpha, ", 1-&beta;=", input$power),
                                     css.cell = "padding-left: .5em; padding-right: .2em;")
 
         } else if (input$calculation == "beta") {
