@@ -3,6 +3,10 @@ function (n, k, Rsq, conlev) {
     ## k is the number of variables
     ## Rsq is the squared multiple correlation
     ## conlev is the confidence level
+  
+  
+    # Temporary fix to ensure correct numbers
+    k <- k - 1
 
     maxiter <- 50 ## maximum number of iterations
     pul <- (1-conlev)/2
