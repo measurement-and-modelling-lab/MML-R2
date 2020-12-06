@@ -61,13 +61,13 @@ function myFunction() {
             ## Calculation selector
             radioButtons("calculation",
                          "Calculation to run:",
-                         choiceNames = list(HTML("Confidence interval on population R<sup>2</sup> (fixed regressor)"),
-                                            HTML("Confidence interval on population R<sup>2</sup> (random regressor)"),
+                         choiceNames = list(HTML("Confidence interval on population R<sup>2</sup> (random regressor)"),
+                                            HTML("Confidence interval on population R<sup>2</sup> (fixed regressor)"),
                                             HTML("Power to reject population R<sup>2</sup> = 0"),
                                             HTML("Sample size to reject population R<sup>2</sup> = 0"),
                                             "Standardized regression coefficients from sample data",
                                             HTML("R<sup>2</sup> from sample data")),
-                         choiceValues = list("fixedci", "randomci", "power", "samplesize", "beta", "r2")),
+                         choiceValues = list("randomci", "fixedci", "power", "samplesize", "beta", "r2")),
             HTML("<hr>"),
 
             ## File upload

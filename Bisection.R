@@ -5,7 +5,7 @@ function (n, k, Rsq, conlev) {
     ## conlev is the confidence level
   
   
-    # Temporary fix to ensure correct numbers
+    # Temporary fix to ensure correct output and fix off by 1 error
     k <- k - 1
 
     maxiter <- 50 ## maximum number of iterations
