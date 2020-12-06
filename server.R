@@ -257,7 +257,7 @@ shinyServer(function(input, output, session) {
             FW <- FW[[input$familywise]]
             output.new <- htmlTable(beta.output,
                                     css.cell = "padding-left: .5em; padding-right: .5em;",
-                                    caption = "<b>  Beta Coefficients</b>",
+                                    caption = "<b>Standardized Beta Coefficients</b>",
                                     cgroup = c("Estimates", ""),
                                     tfoot = paste0("Y=",input$criterion,", X=",paste(input$predictors, collapse=","), ", 1-&alpha;=", input$confidence, ", FW=", FW),
                                     n.cgroup = c(3,4))
